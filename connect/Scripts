@@ -1,0 +1,46 @@
+'connect' Script Language
+-------------------------
+
+Connect utilizes a very simple script language to accomplish its work.
+You need to customize the script for each system you intend to use
+connect with, so read up!
+
+Script commands are single character commands followed by arguments
+as required by the particular command.  Currently, there are only
+a few commands:
+
+----------------------------------------------------------------------------
+w/string
+-----------
+
+Waits for string to come across the TTY.  For example, if you wanted
+connect to pause until the prompt "login: " appears, use
+
+w/login:
+
+The '/' is a separator. Its function is to make it easier to read
+'w' command lines with an argument starting with a space.
+----------------------------------------------------------------------------
+p/string
+--------
+
+Sends the specified text to the TTY.  Our little sample script now becomes
+something like:
+
+w/login:
+p/bazyar\n
+
+Note the '\n'; like C, you must specifically tell connect to print
+carriage returns and other control codes with an escape sequence.
+This allows connect to work with highly interactive systems and software.
+The currently supported escape sequences are:
+
+	\\	- send a backslash character
+	\n	- send a newline (LF - ascii 10)
+	\r	- send a carriage return (CR - ascii 13)
+
+That's all there is to it!  See some of the sample scripts (and if you
+have GNO 1.1, test them with PTYs) and learn how to make your IIGS
+automatically talk to the rest of the world behind your back. :-)
+Future versions will be more robust and support timeouts in w/,
+conditional script execution, and other incredible goodies.

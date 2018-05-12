@@ -1,0 +1,238 @@
+ macro
+&l ~Int2Dec &p1,&p2,&p3,&p4
+&l ph2 &p1
+ ph4 &p2
+ ph2 &p3
+ ph2 &p4
+ ldx #$260B
+ jsl $E10000
+ mend
+ macro
+&l ~Long2Dec &p1,&p2,&p3,&p4
+&l ph4 &p1
+ ph4 &p2
+ ph2 &p3
+ ph2 &p4
+ ldx #$270B
+ jsl $E10000
+ mend
+ macro
+&l ~LongDivide &p1,&p2
+&l ph4 &p1
+ ph4 &p2
+ ldx #$0D0B
+ jsl $E10000
+ mend
+ macro
+&l ~LongMul &p1,&p2
+&l ph4 &p1
+ ph4 &p2
+ ldx #$0C0B
+ jsl $E10000
+ mend
+ macro
+&l ~DisposeHandle &p1
+&l ph4 &p1
+ ldx #$1002
+ jsl $E10000
+ mend
+ macro
+&l ~FindHandle &p1
+&l ph4 &p1
+ ldx #$1A02
+ jsl $E10000
+ mend
+ macro
+&l ~FreeMem
+&l ldx #$1B02
+ jsl $E10000
+ mend
+ macro
+&l ~MaxBlock
+&l ldx #$1C02
+ jsl $E10000
+ mend
+ macro
+&l ~NewHandle &p1,&p2,&p3,&p4
+&l ph4 &p1
+ ph2 &p2
+ ph2 &p3
+ ph4 &p4
+ ldx #$0902
+ jsl $E10000
+ mend
+ macro
+&l ~TotalMem
+&l ldx #$1D02
+ jsl $E10000
+ mend
+ macro
+&l ~RealFreeMem
+&l ldx #$2F02
+ jsl $E10000
+ mend
+ macro
+&l ph2 &n1
+ aif "&n1"="*",.f
+ lclc &c
+&l anop
+&c amid &n1,1,1
+ aif "&c"="#",.d
+ aif s:longa=1,.a
+ rep #%00100000
+.a
+ aif "&c"<>"{",.b
+&c amid &n1,l:&n1,1
+ aif "&c"<>"}",.g
+&n1 amid &n1,2,l:&n1-2
+ lda (&n1)
+ pha
+ ago .e
+.b
+ aif "&c"="<",.c
+ lda &n1
+ pha
+ ago .e
+.c
+ pei &n1
+ ago .e
+.d
+&n1 amid &n1,2,l:&n1-1
+ pea &n1
+ ago .f
+.e
+ aif s:longa=1,.f
+ sep #%00100000
+.f
+ mexit
+.g
+ mnote "Missing closing '}'",16
+ mend
+ macro
+&l ph4 &n1
+ aif "&n1"="*",.f
+ lclc &c
+&l anop
+&c amid &n1,1,1
+ aif "&c"="#",.d
+ aif s:longa=1,.a
+ rep #%00100000
+.a
+ aif "&c"<>"{",.b
+&c amid &n1,l:&n1,1
+ aif "&c"<>"}",.g
+&n1 amid &n1,2,l:&n1-2
+ ldy #2
+ lda (&n1),y
+ pha
+ lda (&n1)
+ pha
+ ago .e
+.b
+ aif "&c"<>"[",.c
+ ldy #2
+ lda &n1,y
+ pha
+ lda &n1
+ pha
+ ago .e
+.c
+ aif "&c"<>"<",.c1
+ pei &n1+2
+ pei &n1
+ ago .e
+.c1
+ lda &n1+2
+ pha
+ lda &n1
+ pha
+ ago .e
+.d
+&n1 amid &n1,2,l:&n1-1
+ pea +(&n1)|-16
+ pea &n1
+ ago .f
+.e
+ aif s:longa=1,.f
+ sep #%00100000
+.f
+ mexit
+.g
+ mnote "Missing closing '}'",16
+ mend
+ macro
+&l quitgs &p
+&l jsl $E100A8
+ dc i2'$2029'
+ dc i4'&p'
+ mend
+ macro
+&l writegs &p
+&l jsl $E100A8
+ dc i2'$2013'
+ dc i4'&p'
+ mend
+ MACRO
+&lab GNOError &a1,&a2,&a3
+&lab aif c:&a3=0,.a
+ cmp #$ffff
+ bne ~&SYSNAME&SYSCNT
+ aif &a3=2,.a
+ aif &a3=4,.c
+ mnote 'GNOError: Return length must be 2 or four',16
+ ago .e
+.c
+ cpx #$ffff
+ bne ~&SYSNAME&SYSCNT
+.a
+ ldx &a1
+ aif c:&a2,.b
+ jsl GNOError
+ ago .e
+.b
+ ldy &a2
+ jsl GNOError2
+.e
+~&SYSNAME&SYSCNT anop
+ MEND
+ MACRO
+&lab GSError &a1,&a2
+&lab ldx &a1
+ aif c:&a2,.a
+ jsl GSError
+ mexit
+.a
+ ldy &a2
+ jsl GSError2
+ MEND
+ MACRO
+&lab WriteGString &a2,&a1
+&lab ldx &a2
+ ldy &a2|-16
+ aif c:&a1,.a
+ lda #2
+ ago .b
+.a
+ lda &a1
+.b
+ jsl WriteGString
+ MEND
+ MACRO
+&lab WriteCString &a2,&a1
+&lab ldx &a2
+ ldy &a2|-16
+ aif c:&a1,.a
+ lda #2
+ ago .b
+.a
+ lda &a1
+.b
+ jsl WriteCString
+ MEND
+ MACRO
+&lab ErrWriteCString &a2
+&lab ldx &a2
+ ldy &a2|-16
+ lda #3
+ jsl WriteCString
+ MEND

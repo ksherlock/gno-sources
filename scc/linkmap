@@ -1,0 +1,42 @@
+Link Editor 2.0.1 B1
+
+Pass 1: .........................................
+Pass 2: .........................................
+
+
+Global symbol table:
+
+000009D0 G 02 00 BRKOFF                     000009CF G 02 00 BRKON
+000009D4 G 02 00 ComInit                    000005B7 G 02 01 CurBaud
+000002C6 G 02 00 DDeInit                    000005B3 G 02 01 DHUP
+00000316 G 02 00 DIOCTL                     0000011B G 02 00 DInit
+00000ADB G 02 00 DOSIMCALL                  000005AB G 02 01 DPHandle
+000009B2 G 02 00 DTROFF                     00000995 G 02 00 DTRON
+00000096 G 02 00 D_demutex                  00000097 G 02 00 D_in_deq
+00000094 G 02 00 D_in_enq                   00000095 G 02 00 D_mutex
+000000A6 G 02 00 D_out_deq                  000000C5 G 02 00 D_out_enq
+000000B1 G 02 00 D_size_inq                 000000BB G 02 00 D_size_outq
+0000085D G 02 00 DeInitSCC                  0000092C G 02 00 EndSerial
+00000AD1 G 02 02 GERROR                     00000AD3 G 02 02 GVERSION
+00000A46 G 02 00 INSTALLINTVECT             000007C7 G 02 00 InitSCC
+0000083B G 02 00 InitSCC2                   000005F7 G 02 00 InstallInt
+00000617 G 02 00 IntVect                    00000ACF G 02 02 PBLOCK
+00000A80 G 02 00 REMOVEINTVECT              0000071B G 02 00 ReadBuffer
+00000609 G 02 00 RemoveInt                  000005D9 G 02 01 RevBDTab
+00000AD7 G 02 02 SIMADDRESS                 00000AD5 G 02 00 SIMINDATA
+00000ABA G 02 02 SIMLIBDATA                 00000ABA G 02 02 SIMNAME
+00000AD5 G 02 02 SIMPORT                    000005A9 G 02 01 SerialDP
+000005A9 G 02 01 SerialData                 00000000 G 02 00 SerialHeader
+00000A11 G 02 00 SetWord                    000008A7 G 02 00 StartSerial
+00000755 G 02 00 WriteBuffer                0000078E G 02 00 WriteByteOld
+000005B9 G 02 01 baudTbl                    000005AF G 02 01 bufHandle
+00000532 G 02 00 checkIntr                  000006E1 G 02 00 check_stuff
+00000000 G 02 00 dtty                       0000082E G 02 00 initBaudHi
+0000082C G 02 00 initBaudLo                 000000DF G 02 00 lowRead
+000000A7 G 02 00 nullfunc                   00000605 G 02 00 oldVect
+000005B5 G 02 01 ourSerFlag                 000009D1 G 02 00 priorityWrite
+00000947 G 02 00 turn_flow_off              0000096C G 02 00 turn_flow_on
+
+
+
+There is 1 segment, for a length of $00000B07 bytes.

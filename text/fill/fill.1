@@ -1,0 +1,56 @@
+.\" @(#)fill.1	2.3
+.TH FILL 1 local
+.SH NAME
+fill - a simple text formatter
+.SH SYNOPSIS
+fill [[-b] [-j] | [-c]] [-d] [-r n] [-l n] [-p n]
+.SH DESCRIPTION
+.I Fill
+is a simple text formatter meant to be used from within
+your editor to provide a functionality similar to the ^B command
+in WordStar.  This presumes your editor can pipe an object through
+a filter.  In vi, you would do something like "!}fill" to word wrap
+a paragraph.  Of course, you may, in the spirit of Unix, find other
+uses for it.  For example,
+.I fill
+has the side-effect of de-tabifying
+lines passed to it.
+.PP
+The following options pertain:
+.nf
+	-b	box the output lines
+	-c	center the lines
+	-d	the text block has a delimiter on the left side
+	-j	justify the right margin
+	-p n	set paragraph indent value
+	-r n	set right margin to column "n", defaults to 72
+	-l n	set left margin to column "n", defaults to 1
+.fi
+.sp
+The "-d" option is used to preserve a left hand delimiter
+on the text, such as might be used on a comment block
+in a source file.  It does this by taking the first white-space
+delimited word in the input text and replicating it down the
+left-hand side of the output text block.  It concurrently
+drops the first word on each line in its input.
+.PP
+The "-p" option is used to set a paragraph indent.  The indent
+value specified is added to the left margin for the first line
+of output.  Negative values may be used for hanging indents.
+.SH FEATURES
+.I Fill
+has no practical limit on line lengths (except when centering).
+.SH BUGS
+The justification algorithm is a little crude.
+.br
+The delimited text option can be easily confused.
+.br
+Abbreviations (eg.  this one) get an extra space after them.
+.br
+.I Fill
+makes no attempt to preserve existing indentations or blank
+lines (this could be construed as a feature).
+.SH AUTHOR
+Chad R. Larson
+.SH "SEE ALSO"
+pr(1), nroff(1), troff(1)

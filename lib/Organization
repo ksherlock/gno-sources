@@ -1,0 +1,18 @@
+The GNO/ME 1.1 libraries are organized as follows:
+
+libc:
+  Anything from the Unix C Libraries (Section 3 manpages).
+
+libgno:
+  GNO/ME Kernel Interface Functions
+
+lregexp:
+  Regular expression package
+
+ltermcap:
+  Terminal Capability Database package
+
+Since libraries under ORCA must be ordered topologically (i.e., a library
+function foo() that references a library function bar() must come _after_
+bar() in the library search order, or be in the same library) we have put
+as many routines as possible into libc.

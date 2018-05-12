@@ -1,0 +1,109 @@
+# 1 "s26.c"
+s26(pd0)                   
+# 1 "./defs"
+   struct defs {
+     int cbits;           
+     int ibits;           
+     int sbits;           
+     int lbits;           
+     int ubits;           
+     int fbits;           
+     int dbits;           
+     float fprec;         
+     float dprec;         
+     int flgs;            
+     int flgm;            
+     int flgd;            
+     int flgl;            
+     int rrc;             
+     int crc;             
+     char rfs[8];         
+   };
+# 2 "s26.c"
+
+struct defs *pd0;
+{
+   static char qs26[8] = "s26    ";
+   char *ps, *pt;
+   char c0, c1;
+   float temp, one, delta;
+   double tempd, oned;
+   static char s[] = "%3d bits in %ss.\n";
+   static char s2[] = "%e is the least number that can be added to 1. (%s).\n";
+
+   ps = qs26;
+   pt = pd0->rfs;
+
+   while(*pt++ = *ps++);
+
+           
+
+
+   pd0->cbits = 0;
+   c0 = 0;
+   c1 = 1;
+
+   while(c0 != c1) {
+     c1 = c1<<1;
+     pd0->cbits = pd0->cbits+1;
+   }
+           
+
+   pd0->ibits = pd0->cbits * sizeof(int);
+   pd0->sbits = pd0->cbits * sizeof(short);
+   pd0->lbits = pd0->cbits * sizeof(long);
+   pd0->ubits = pd0->cbits * sizeof(unsigned);
+   pd0->fbits = pd0->cbits * sizeof(float);
+   pd0->dbits = pd0->cbits * sizeof(double);
+
+           
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   one = 1.;
+   delta = 1.;
+   temp = 0.;
+   while(temp != one) {
+     temp = one+delta;
+     delta = delta/2.;
+   }
+   pd0->fprec = delta * 4.;
+   oned = 1.;
+   delta = 1.;
+   tempd = 0.;
+   while(tempd != oned) {
+     tempd = oned+delta;
+     delta = delta/2.;
+   }
+   pd0->dprec = delta * 4.;
+
+           
+
+   if(pd0->flgm != 0) {
+     printf(s,pd0->cbits,"char");
+     printf(s,pd0->ibits,"int");
+     printf(s,pd0->sbits,"short");
+     printf(s,pd0->lbits,"long");
+     printf(s,pd0->ubits,"unsigned");
+     printf(s,pd0->fbits,"float");
+     printf(s,pd0->dbits,"double");
+     printf(s2,pd0->fprec,"float");
+     printf(s2,pd0->dprec,"double");
+   }
+           
+
+
+   return 0;
+}

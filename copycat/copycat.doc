@@ -1,0 +1,416 @@
+-------------------------------------------------------------------------------
+~ Copycat v1.4.1 - copies information from one tty to another bi-directionally.
+-------------------------------------------------------------------------------
+
+This  program REQUIRES GNO!!  If you don't have GNO, consider buying it.  
+Copycat is too cool to do without ;).
+
+---------------------------------
+~1 - Documentation?  What's that?
+---------------------------------
+
+Below lie  the  instructions  for  copycat.   Read, and be  illuminated.
+
+Header topics are set off by a single tilde (~) and their header number,  
+so you can  move between headers by searching for a tilde and the header
+number.  The glossary  has no number and is headed  with two tildes  for 
+quick  reference.  
+
+In  general, terms of interest will be set off  by  two sets  of  single 
+quotes (``term'') and output will be quoted by a single set of single or 
+double quotes.  
+
+----------------------
+~2 - Table Of Contents
+----------------------
+
+     1 ....... "Documentation?  What's That?"
+     2 ....... Table Of Contents
+     3 ....... "What is all this stuff about ttys?"
+     4 ....... Summary
+     5 ....... What Copycat Is
+     6 ....... What Copycat Isn't
+     7 ....... Requirements
+     8 ....... Features Of Copycat
+     9 ....... Command Mode
+     A ....... "Why do I get those weird things when I do a 'ps'?"
+     B ....... Using Copycat As A Term Program
+     C ....... Bugs
+     ~ ....... Glossary
+
+     X ....... Trivia Corner
+     Y ....... Revision History
+     Z ....... End Notes
+
+-----------------------------------------
+~3 - "What is all this stuff about ttys?"
+-----------------------------------------
+
+If there  are any terms you haven't  encountered before that I use, they
+can probably  be  found  within  the GNO manual.  Terms which I use here
+that are not in the GNO manual can be found in the glossary at  the  end
+of this text.
+
+------------
+~4 - Summary
+------------
+ 
+    Parameters:   Copycat takes two parameters on startup; two tty names.  
+                  For example:
+
+                      % copycat .ttya .ttyb &
+
+                  is the  command I use  to start  copycat running; this 
+                  command  links  my   modem  and   terminal  (which  is 
+                  connected  to the  printer port) and  places it in the 
+                  background.
+
+*** IMPORTANT *** Note that the second tty MUST be a terminal in control
+                  of the user, as it is the only one in  which the break
+                  character (^\) will be interpreted.
+  
+    Return codes: Zero if it exits normally, otherwise nonzero. 
+
+--------------------
+~5 - What Copycat Is
+--------------------
+
+Copycat is a program I devised so I could use my terminal both for my GS 
+and my  modem  without  having to swap connectors all the time.  This is
+copycat's primary function in life; however, in its current incarnation, 
+it also provides a nice  cheap  terminal  program  (with  no  emulation,
+however),  as  long  as  you  know  how to tell the remote system to use
+``gnocon'' emulation (see "Using copycat as a term program", below).  
+
+-----------------------
+~6 - What Copycat Isn't
+-----------------------
+
+Copycat is -not- intended to be a neato-keen terminal program with nifty 
+emulations and lots of transfer protocols.  If there was one design goal 
+I had in mind, it was to keep copycat as cheap as possible with  respect
+to CPU munched, stack space used, and normal memory used.  Copycat meets 
+these  design  goals rather well, I think :). By not opting to translate
+the input as it comes in (emulation) and  not  doing  several  things  a
+'normal'  term  program  does,  it allows for very fast transfer of data
+with minimal CPU overhead.  
+
+-----------------
+~7 - Requirements
+-----------------
+
+Very little.  Approximately 3k of stack space, and less than 20k of free 
+ram.  I don't know if it requires GNO 1.0 or not, but it has been tested 
+with GNO 1.0 and works fine.  It does require the new GNO serial drivers 
+which were recently placed at pindarus.cs.uiuc.edu; they fix  some  very
+nasty bugs that caused copycat to puke most ungracefully.  
+
+------------------------
+~8 - Features Of Copycat
+------------------------
+
+Copycat  will  copy  data  bidirectionally  between  two ttys under GNO.
+Possible uses of this include using a modem from a terminal, allowing  a
+user  who  is  dialing  in to access the modem, and using it as a simple
+terminal program.  More on that later.
+
+Copycat uses a ``telnet''-like interface, allowing the user to break out 
+into the 'copycat> ' prompt and perform certain tasks.  This  is  called
+``command mode''.    When copycat is 'copying', I call it ``copy mode''.
+Easy, ne?
+
+When in copy mode, hitting '^\' (Control-\) will  allow you to break out 
+of  copy mode  and  return  to command  mode.  In  the future  this  key 
+sequence might be customizable...
+
+-----------------
+~9 - Command Mode
+-----------------
+
+  When in command mode, you can use the following commands:
+ 
+?,help ............... bring up a help screen
+echo ................. toggle echo
+
+        This  would be  useful if you  were  using copycat to 
+        communicate with another user on another tty.
+
+!<command> ........... shell executes <command>
+write <command> ...... execute <command> and redirect output to .ttya
+
+        Right now redirection is only stdout, I am considering 
+        adding support for redirection to stderr as well.  For 
+        now, use "!<cmd> >&" instead.
+
+quit ................. exit copycat
+z .................... suspend copycat and return to shell.
+[CR] ................. resume copy mode.
+
+--------------------------------------------------------
+~A - "Why do I get those wierd things when I do a 'ps'?"
+--------------------------------------------------------   
+
+Copycat uses a rather clever trick suggested  to  me  by  Jawaid  Bazyar
+which reduces  CPU  overhead  by  a staggering amount.  With most (all?)
+term programs I know of, even when nothing is  being  sent  or  received
+from  the  modem  the  terminal  program  is  sitting  in  a  tight loop
+processing input. This is known as 'busywaiting', because the program is 
+tieing up the CPU just waiting for input.  On a  single  tasking  system
+this  isn't  generally noticable, but on a multitasking system it puts a
+lot of unnecessary strain on the CPU.  
+
+What copycat does is it uses GNO's 'fork()' function to  spawn  off  two
+child  processes:  one  which reads from the first tty and writes to the
+second, and one which reads from  the  second  tty  and  writes  to  the
+first.   On  the  surface  this  doesn't seem adventageous but it allows
+copycat to take  advantage  of  one  of  UNIX's  most  useful  features:
+programs  waiting  for  input  can  be scheduled in such a way that they
+don't take  up any  CPU time  until they  actually have  data  to  read. 
+Programs in this state  are  generally  known as ``suspended'', although
+in GNO  the term is ``blocked''. In  any case, it means that the program 
+is off to the  side, not  using precious  CPU cycles  until  it has some 
+data to operate with.  
+
+Because  of  the amount of time taken to fetch input is so long compared
+to the time it takes the CPU to execute one instruction, this  allows  a
+huge  amount  of  processing  to  go  on  that would otherwise have been
+competing for time with the process waiting for input.  
+
+What this means is that when copycat is running, it has three  processes
+currently active.   A typical 'ps' while running copycat might look like
+this: 
+
+     ID  STATE   TT MMID   TIME COMMAND
+      1  ready   co 1002   0:03 NullProcess
+      2  ready   co 1006   0:04 gsh
+     59  waiting 01 1007   0:00 copycat .ttya .ttyb
+     60  blocked 01 1005   0:11 forked child of copycat .ttya .ttyb
+     61  blocked 01 1008   0:00 forked child of copycat .ttya .ttyb
+     64  running co 1009   0:00 ps
+
+First off, you can see that I am running a link between .ttya (the modem 
+port) and .ttyb (the printer port, to which my  terminal  is  attached).
+Remember that .ttyb is the _controlling tty_, which means that the break 
+character (^\) is only effective when received from this tty.  
+
+Process  59 is the main copycat process, it is waiting until the program
+exits.  It doesn't do anything but fork off the two read children.    It
+uses  only  1k  of  stack  space,  and no CPU time, so it's not terribly
+wasteful.  
+
+Process 60 is the process which is copying data from .ttya to .ttyb.  It
+has  accumulated  so much CPU time because its transferred far more data
+than the second process.  It's current state of ``blocked''  means  that
+it's waiting for data, and not executing.  
+
+Process  61  is  the process which copies data from .ttyb to .ttya. Even
+though I'm a fast typer, it's accumulated virtually no CPU time ;). This 
+is the process which handles command mode  when  a  break  character  is
+received.  
+
+------------------------------------
+~B - Using Copycat As A Term Program
+------------------------------------
+
+Use of copycat as a terminal program in its own right is a bit involved, 
+but the  results  can be very nice.  The first thing to keep in mind, is
+that copycat is -not- a terminal emulator.  Thus, you can't tell  it  to
+select whatever  emulation  your remote system likes best.  Despite this
+limitation, copycat can still be used as a terminal program.  
+
+What you need to do  is  to  have  your  remote  system  use  ``gnocon''
+emulation,  which  can be found in the termcap file that comes with GNO.
+If your remote system is a UNIX-style system,  you  shouldn't  have  any
+major difficulties  in  getting  it to use gnocon emulation.  Otherwise,
+you are on your own :) 
+
+The first thing to find out is if your system uses the TERMINFO database 
+system,  or it  uses a termcap  like  GNO does.   One system  that  uses
+TERMINFO is HP/UX.  Most UNIX systems use termcap.  
+
+If  your  system  uses  termcap, all you need to do is upload the gnocon
+entry in your termcap file to the UNIX system.   Add  the  line  'setenv
+TERM '  to the front of the termcap entry, and save the file.  Make sure
+to quote the termcap entry as well.  Use the 'chmod' program  to  change
+the  mode to 700, and you will be able to execute the program as a shell
+script.  When you execute this shell script,  it  will  add  the  gnocon
+entry  to  your termcap file, and you will be able to 'set term=gnocon'.
+That's all you need to do, from now on you can use copycat  on  console,
+just make sure to 'set term=gnocon' before you do anything that requires 
+anything fancy like cursor movement or inverse.  
+
+If your system uses TERMINFO, then do the following: 
+
+First  upload  the  gno  termentry  to a file  and  name  it  'gnoterm'.
+Type    'mkdir  terminfo'   in    your   home   directory.   Then   type 
+'setenv TERMINFO $HOME/terminfo'.   Type  'captoinfo gnoterm > gnofile'.  
+Next  type 'tic gnofile'.  This  will compile the  terminfo database and
+place it in your terminfo directory.  After this, all you need to do is:
+'set term=gnocon'.
+
+Remember,  whenever  you log  in now  you'll have  to set the respective
+environmental  variables  again.  When  you log  in to a  terminfo-based 
+system  you'll   need  to  type 'setenv TERMINFO $HOME/terminfo'.   When
+you log  in to a termcap-based system you'll  need to execute the script
+which  contains  your  termcap  entry.   Then, for  each system,  you'll 
+need to 'set term=gno'.
+
+---------
+~C - Bugs
+---------
+
+Copycat doesn't  use stdio for  its command  mode interface,  which gets
+annoying  if you ever have to use delete.  I will have to use termcap to
+make a delete-friendly interface, something to look into soon...
+
+Right  now  the  only  bugs  I know of probably stem from the GNO serial
+drivers.  Copycat will sporadically hang, and  I  have  no  reason  why.
+Jawaid  has  reported  similar  behavior  before,  hopefully he will fix
+this.  With the new drivers, (see "Requirements" above) I have  not  had
+this happen as often.
+
+One  problem  the current drivers DO have is when too much data flows in
+too fast.  Copycat will spew strange characters to the screen  and  then
+hang.  There isn't anything I can do at this time about this problem, it 
+has  to  do with the GNO serial drivers not properly handling a flood of
+data.  This problem won't happen at 2400 baud, and it only  happens when 
+the GS is receiving data, not sending data.
+
+Sometimes  copycat  will  end  up  with a few children left over somehow
+(generally after one of the above problems occurs).   Nothing  to  worry
+about,  just  'kill  pid' where 'pid' is the process number given you by
+'ps' in the 'ID' field.
+
+-------------
+~~ - Glossary
+-------------
+
+"break character"  The control character that allows you to  switch from
+                   copy mode to  command mode.  Currently the only valid
+                   break character is '^\' (Control-\).
+
+"copy mode"        The mode in which copycat is copying data between the
+                   two ttys.
+
+"command mode"     When  you see the "copycat> " prompt  and can execute
+                   commands.
+
+"controlling tty"  The second  tty on the  commandline; this is the only
+                   tty  from which command mode  can be switched to with
+                   the  break  character.  If  copycat  was called  like
+                   this:
+
+                        % copycat .ttya .ttyco
+
+                   then .ttyco  (the console) would  be the  controlling
+                   tty.
+
+"copycat"          duh.
+
+"Mortimer"         Not  exactly  Max the  Dog, but  we  can't all  be so 
+                   lucky.
+
+"telnet"           Something that GNO might have some day soon.
+
+------------------
+~X - Trivia Corner
+------------------
+
+Well, Ian Schmidt has for quite a long time had Rush trivia at  the  end
+of  the documentation for his handy AudioZap (tm, (c), R) software, so I
+thought I'd give you guys some trivia from a REAL band, and figure maybe 
+someone will reply :) 
+
+   So, to start off with a chestnut (I love chestnuts):
+
+      Who is the lead singer of Jethro Tull (ohh, this is too easy!!).
+
+---------------------
+~Y - Revision History
+---------------------
+
+   v1.4.2 - Added  a new command  to the command  mode menu.  ``mt'' now
+            disables  mousetext.  I  was   having  problems  with  vt100
+            escape codes activating mousetext by mistake...
+
+   v1.4.1 - Whoops, I should follow my own  advice more often!  I forgot 
+            to have  the usage  print the version  number :)  Now fixed.
+            I also fixed a  potential problem with restartability, which
+            should   have  caused  some   problems  but  didn't.   Hm...
+            
+   v1.4.0 - Added a ``write''  command to  copycat, it  will execute the
+            given command and redirect stdout to the non-controlling tty.  
+            For example, where before you  might have typed '!ls > .ttya' 
+            to  send a listing  to the modem, now you can type 'write ls'  
+            instead. Copycat is now restartable, thanks to the 'rexit()'
+            call.  I don't think people will mind  too much seeing as it 
+            uses very  little memory.  Copycat now calls _INITGNOSTDIO()
+            so it  won't  kill  the  system if  you  try to  run  it  in 
+            any system besides GNO/ME.
+
+   v1.3.6 - Added an ``echo'' flag to command mode, to toggle the mode of
+            the ttys between ``raw'' and ``echo'' modes.  Generally, this
+            would  be  used  if two  local users  were  using copycat  to
+            commmunicate.  Also added error checking on the open() calls,
+            so opening strange (nonexistant) ttys will no longer hang the
+            program,  but will abort  it with  an error message  instead.  
+            Also  added  a small  "Break  character is '^\'"  message,  so 
+            people hopefully won't forget what it is :)
+ 
+   v1.3.5 - z now works properly - changing the 'kill(main_pid,SIGSTOP);'
+            to  a 'kill(-main_pgrp,SIGSTOP);' has  fixed things: before I
+            wasn't suspending the 2nd  child at the same time as the main
+            process, whoops.  Other minor improvements consist of a  more 
+            helpful usage  printout (suggested by Jawaid), and a sleep(1)
+            call added  after the  kill mentioned  above; this delays the
+            'copycat> ' prompt  printout  until after copycat is resumed,
+            which makes  it look quite a  bit cleaner.  ^C and ^Z are now
+            ignored throughout the program (as I provide support for both
+            functions) and ^\ is now blocked when in command mode. 
+
+     v1.3 - A break  character  has been added, so  you can now terminate 
+            copycat from within  the program  itself.  ^\ will  break out
+            and  put you  into a  telnet-like  prompt, 'copycat> '.  From 
+            here you can type help, quit, !<command> (to  execute a shell 
+            command),  and   [CR]  to   resume.   Setting/restoring   tty 
+            parameters  have been consolidated into two functions.  ``z'' 
+            will  suspend the  program  and return to  the shell,  but it 
+            doesn't  want to  resume properly yet  for some wierd reason.  
+            For   future   reference,   this   mode    will   be   called 
+            ``command mode'' and  the other  (ie when copycat is actually 
+            copying) ``copy mode''.
+
+     v1.2 - Copycat now detects a SIGHUP and will quit, killing the child
+            processes properly.
+
+     v1.1 - Implemented a  suggestion  by  Jawaid  Bazyar  to  split  the 
+            reading  and writing  of the ttys  into two  different  child 
+            processes, thus  freeing up a  huge amount of CPU time.  Now, 
+            when a tty  isn't busy, the  computer  doesn't need  to spend 
+            lots of precious CPU time waiting for data to appear.
+
+     v1.0 - initial version; works  but it loses  characters at any speed
+            greater than 9600 baud and  eventually hangs.  The program is
+            also a lot  greedier wrt CPU time than it could be, hopefully
+            I can find a way to fix that...
+
+--------------
+~Z - End Notes
+--------------
+
+Legal stuff: if copycat wipes out  your hard drive, it's  not my  fault!  
+
+Copycat is freeware, and if you ask nicely I'd be happy to let  you  see
+the source  (if  you  actually want to?  :). I think it's pretty useful,
+and my only request is that I get some feedback  from  anyone  who  uses
+it.   Right  now  I can't think of all that many features to add, if you
+have ideas then mail them to me and I'll see what I can do about  adding
+them.  
+
+And finally, I'd like  to thank Jawaid Bazyar, Dave Huang, and  everyone 
+else who has helped me debug and think of new features for this program.
+
+James Brookes
+
+bb252@cleveland.freenet.edu
+jamesb@cscihp.ecst.csuchico.edu

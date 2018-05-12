@@ -1,0 +1,56 @@
+To install 'man' in your GNO system, you need to do the following:
+Prefix 31 should be set to the root of your GNO pseudo-Unix volume
+space.  For example, on my system I have
+
+prefix 31 /software
+
+Create a directory 31/usr/man.  Then, add this line to your 'gshrc'
+file:
+
+set usrman="31/usr/man"
+
+ Inside that directory, create the following subdirectories:
+
+  man1
+  man2
+  man3
+  ...
+  man8
+  cat1
+  cat2
+  ...
+  cat8
+
+Then, move all the manual pages you have to these directories, as follows.
+If the manpage or doc file is already formatted (i.e. not an AWGS file
+or an nroff input file) then put it in the 'cat' directory corresponding
+to the manual's place:
+
+  Section	Description
+    1		General Utilities
+    2		System Calls
+    3		C Library Calls
+    4		Device Driver Documentation
+    5		File format descriptions
+    6		Games
+    7		Miscellaneous
+    8		Administration
+
+If the manpage is NOT preformatted, then put it into one of the 'man'
+directories.
+
+  Finally, make sure that the 'man' executable program is in your path,
+type 'rehash' if you haven't already done so, and try it out with
+'man grep' (aroff manpage included with GNO v1.0).
+
+  You may, if you wish, root the manpage directories anywhere by
+changing the $USRMAN variable; however, we recommend that you follow
+our example so that future utilities know how to find the manpage
+directories (via 31/usr/man).  man does not currently support a $manpath
+variable so users can have individual man directories.
+
+Please direct questions/comments/complaints to:
+
+AOL: GNO Jawaid
+Internet: mfrankow@hamline.edu
+GEnie: Procyon.Inc

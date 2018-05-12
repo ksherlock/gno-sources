@@ -1,0 +1,147 @@
+   +-------------   Documentation of program evaluate   -------------+
+   |                                                                 |
+   |   evaluate: a program to interpret command line arguments       |
+   |             and place the results in a shell variable           |
+   |                                                                 |
+   |   Designed to work with the ORCA shell, version 2.0.            |
+   |                                                                 |
+   |   Freeware by Dave Tribby; ORCA/C source code included.         |
+   |      GEnie: D.TRIBBY       *       Internet: tribby@cup.hp.com  |
+   |      1529 Fantail Court, Sunnyvale, CA  94087                   |
+   +-----------------------------------------------------------------+
+
+NOTE:
+
+   evaluate may be distributed freely, but may not be sold without
+   permission from the author, Dave Tribby.
+
+   This program uses material from the ORCA/C run-time libraries,
+   copyright 1987-1989 by Byte Works, Inc. Used with permission.
+
+   Thanks to Shawn Quick on Genie who suggested a work-around to a
+   problem with the ORCA shell.
+   
+Use the install EXEC file distributed with evaluate to place evaluate in 
+the Utilities and Utilities:Help directories, and to update 15:SysCmnd file.
+
+evaluate expands the ORCA shell's ability to assign values to variables.
+ORCA's SET command only allows variables to be set to simple strings;
+evaluate expands the concept to include expansion of wildcard expressions
+and the output of programs.
+
+usage: evaluate [-w] <variable_name> <expression>
+
+evaluate requires at least two parameters: a shell variable name and
+an expression to be evaluated and assigned to that variable. evaluate
+will try to expand the expression in the following ways:
+
+     1.	Any strings enclosed in ' or " quotes are copied as-is (after
+        removing the quote character) into the result string.
+
+     2. Any strings enclosed in ` quotes are executed by the shell and the
+        output is copied into the result string. Control characters (including
+        new-lines) are replaced by spaces.
+
+     3. Numbers enclosed in [ and ] are interpreted as indices into the
+        result string; only the specified elements are kept in the result.
+        A single index can be provided, or two indices separated by "-".
+        The index is a positive integer or "#" to indicate the last element.
+        For example, [2-#] would specify all but the first element.
+        Elements are delimited by quotes or spaces.
+        The indices must be the final part of the expression.
+
+     4. All other character strings are expanded and the result is added
+        to the result string
+
+If the optional -w parameter is provided, evaluate will not apply wildcard
+expansion to the expression. You may want to supress wildcard expansion
+if the expression might contain the name of a file in the local directory
+and you don't want its directory prefix to be added.
+
+
+Some examples...
+
+     evaluate cfiles =.cc
+
+	This expression expands "=.cc" to all the files ending in ".cc" in the
+        current directory. The result is placed in shell variable {cfiles}.
+
+     evaluate firstfile {cfiles} [1]
+
+	If this command is executed after the previous example, {firstfile}
+        will contain the first file in the directory ending in ".cc". Note
+        that the ORCA shell will expand {cfiles} before calling evaluate.
+
+     evaluate currentdir 8:
+
+     	Sets {currentdir} to the value of prefix 8, the current prefix.
+
+     unset exit
+     evaluate cmds `help` [3-#]
+     for cmd in {cmds}
+       help {cmd}
+       end
+	
+        If these commands were an EXEC file named "GETHELP" then
+	        GETHELP > 14:HelpList
+        would create a listing containing all the help files. The unset
+        command ensures that "help {cmd}" (executed later) will not cause
+        GETHELP to exit if there is no help file. The evaluate command
+        creates a list of available commands in the variable {cmds}; the
+        indexing strips off the first two words, "Available Commands:".
+	
+
+A NOTE ON COMPATIBILITY...
+
+evaluate uses the following shell calls:
+	 InitWildcardGS
+	 NextWildcardGS
+	 ReadVariableGS
+	 SetGS
+	 StopGS
+	 ExecuteGS
+	 RedirectGS
+
+The version of gsh (GNO shell) that I have does not seem to support all of
+these calls. (gsh already provides wildcard expansion, anyway.) I have not tested with any other shell program and would be interested in hearing of
+any successes or problems.
+
+evaluate provides a way to run Unix-style programs that expect a list of
+files under ORCA. For example, "more *.c" could be accomplished with
+	evaluate files =.c
+        more {files}
+
+
+ERRORS
+
+    "Unrecognized option %s"
+        The first parameter began with a "-" but did not contain
+        a valid option ("W" or "w").
+	
+    "User stop key detected"
+	Someone pressed <Open-Apple>-. while evaluate was running.
+
+    "tool error $%x"
+	The indicated hex error was reported by a tool or GS/OS call.
+
+    "Out of memory: can't allocate %d bytes"
+    "Cannot allocate memory for token pointers"
+	A call to malloc or realloc returned a null pointer, indicating
+        that no more memory is available.
+
+    "Warning: result truncated to %d bytes"
+	The expression is longer than 32768 bytes.
+
+    "Error opening temporary file %s"
+    "Error removing temp file %s"
+	The file to hold command output cannot be created or removed.
+
+    "Non-terminated %c string"
+	A ', ", or ` string is not terminated with the proper quote character.
+
+    "Illegal index"
+	An index is less than 1 or greater than the number of elements; or
+        the second index is smaller than the first.
+
+    "Text following index ignored: %s"
+	There is text following the "]" of the index.

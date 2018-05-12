@@ -1,0 +1,8 @@
+This is nroff v1.1p3, v1.1p5 will be out in the future.
+
+OKay, create a shell variable called TMACDIR and have it point to your dir
+where TMAC lives, so that nroff can find its tmac.* files for formatting.
+
+EX:  set TMACDIR="31/lib/tmac"
+
+Enjoy it.  has some bugs, but works overall...

@@ -1,0 +1,27 @@
+Okay, first changes file.
+
+For comments, please either:
+
+	post to gno-l@slab.slip.uiuc.edu    for the GNO mailing list
+or	email to mfrankow@seq.hamline.edu   for direct help from me.
+
+Mike Horwath
+
+--------
+
+1.1p4.1 (jb)
+	In io.c/putbak, there is a check to make sure the putbak buffer
+doesn't overflow.  This was incorrectly checking against the size of MAXLINE
+instead of MAXPBB.
+
+1.1p3.4
+	Well, guess what?  I caused a hell of an error in the last version of this, and now it is fixed.  The problem stemmed from a library error and has been fixed.  All thanks to Jawaid for creating and fixing the error all by himself.  (no flame to ya Jawaid...heh)
+
+1.1p3.3
+        Fixed the problem with nroffing the LESS manpage.  I don't really know
+how the hell I fixed it, but that bug is now gone.  I also optimized the source
+to a great extent.  There is no real speed increase in output, but the executable is MUCH smaller than the original posted version.  Enjoy.
+
+[previous versions]
+        Well, first release.  The versions suck for now till I can figure out
+a better way to do it.  It worked, but had bugs.

@@ -1,0 +1,133 @@
+
+
+
+TERMCAP(3X)      MISCELLANEOUS LIBRARY FUNCTIONS      TERMCAP(3X)
+
+
+
+NAME
+     termcap, tgetent, tgetnum, tgetflag, tgetstr, tgoto, tputs -
+     terminal independent operation routines
+
+SYNOPSIS
+     char PC;
+     char *BC;
+     char *UP;
+     short ospeed;
+
+     tgetent(bp, name)
+     char *bp, *name;
+
+     tgetnum (id)
+     char *id;
+
+     tgetflag (id)
+     char *id;
+
+     char *
+     tgetstr(id, area)
+     char *id, **area;
+
+     char *
+     tgoto(cm, destcol, destline)
+     char *cm;
+
+     tputs(cp, affcnt, outc)
+     register char *cp;
+     int affcnt;
+     int (*outc)();
+
+DESCRIPTION
+     These functions extract and use capabilities from the termi-
+     nal  capability  data  base termcap(5).  These are low level
+     routines; see curses(3X) for a higher level package.
+
+     tgetent() extracts the entry for terminal _n_a_m_e into  the  _b_p
+     buffer, with the current size of the tty (usually a window).
+     This allows pre-SunWindows programs to run in  a  window  of
+     arbitrary  size.   _b_p  should  be a character buffer of size
+     1024 and must be retained through all  subsequent  calls  to
+     tgetnum,  tgetflag, and tgetstr.  tgetent() returns -1 if it
+     cannot open the termcap() file, 0 if the terminal name given
+     does  not  have  an  entry, and 1 if all goes well.  It will
+     look in the environment for a TERMCAP variable.   If  found,
+     and  the value does not begin with a slash, and the terminal
+     type _n_a_m_e is the same as the environment  string  TERM,  the
+     TERMCAP  string is used instead of reading the termcap file.
+     If it does begin with a slash, the string is used as a  path
+     name rather than /etc/termcap.  This can speed up entry into
+     programs that call tgetent, as well as  to  help  debug  new
+
+
+
+Sun Release 4.0    Last change: 6 October 1987                  1
+
+
+
+
+
+
+TERMCAP(3X)      MISCELLANEOUS LIBRARY FUNCTIONS      TERMCAP(3X)
+
+
+
+     terminal  descriptions  or  to make one for your terminal if
+     you cannot write the file /etc/termcap.  Note: if the window
+     size  changes,  the  ``lines'' and ``columns'' entries in _b_p
+     are no longer correct.  See the _S_u_n_V_i_e_w _1 _P_r_o_g_r_a_m_m_e_r'_s _G_u_i_d_e
+     for details regarding [how to handle] this.
+
+     tgetnum() gets the numeric value of capability ID, returning
+     -1  if  is not given for the terminal.  tgetflag() returns 1
+     if the specified capability is  present  in  the  terminal's
+     entry,  0  if it is not.  tgetstr() gets the string value of
+     capability ID, placing it in the buffer at  _a_r_e_a,  advancing
+     the  _a_r_e_a  pointer.   It  decodes the abbreviations for this
+     field described in termcap(5), except for cursor  addressing
+     and  padding  information.   tgetstr()  returns  the  string
+     pointer if successful.  Otherwise it returns zero.
+
+     tgoto() returns a cursor addressing string decoded  from  _c_m
+     to  go  to  column  _d_e_s_t_c_o_l  in  line _d_e_s_t_l_i_n_e.  It uses the
+     external variables UP (from the up capability) and BC (if bc
+     is  given  rather than bs) if necessary to avoid placing \n,
+     ^D or ^@ in  the  returned  string.   (Programs  which  call
+     tgoto()  should  be  sure to turn off the XTABS bit(s),since
+     tgoto()  may  now  output  a  tab.   Note:  programs   using
+     termcap() should in general turn off XTABS anyway since some
+     terminals use ^I (CTRL-I) for other functions, such as  non-
+     destructive  space.)  If  a % sequence is given which is not
+     understood, then tgoto() returns OOPS.
+
+     tputs() decodes  the  leading  padding  information  of  the
+     string  _c_p; _a_f_f_c_n_t gives the number of lines affected by the
+     operation, or 1 if this is not applicable, _o_u_t_c is a routine
+     which  is  called with each character in turn.  The external
+     variable _o_s_p_e_e_d should contain the encoded output  speed  of
+     the  terminal as described in tty(4).  The external variable
+     PC should contain a pad character to be used  (from  the  pc
+     capability) if a NULL (^@) is inappropriate.
+
+FILES
+     /usr/lib/libtermcap.a
+                         -ltermcap library
+     /etc/termcap        data base
+
+SEE ALSO
+     ex(1), curses(3X), tty(4), termcap(5)
+
+
+
+
+
+
+
+
+
+
+
+Sun Release 4.0    Last change: 6 October 1987                  2
+
+
+
+p, a

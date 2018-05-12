@@ -1,0 +1,10 @@
+* Specific equates for the modem port version of the driver
+
+CtlPanBaud	gequ	$6
+PortControl	gequ	$E0C039
+PortData	gequ	$E0C03B
+PortNum	gequ	1	SIM modem port number
+Channel_Rx	gequ	Rx_A
+Channel_Tx	gequ	Tx_A
+Reg11	gequ	%11010000	printer
+PortReset	gequ	%10000000

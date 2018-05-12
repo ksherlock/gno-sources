@@ -1,0 +1,2 @@
+test: s*.o
+	gcc1 -o test s*.o ../gcclib.o -g

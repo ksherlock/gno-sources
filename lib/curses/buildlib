@@ -1,0 +1,43 @@
+cd o
+makelib ../lcurses +addbytes.a 
+makelib ../lcurses +addch.a 
+makelib ../lcurses +addstr.a 
+makelib ../lcurses +box.a 
+makelib ../lcurses +clear.a 
+makelib ../lcurses +clrtobot.a 
+makelib ../lcurses +clrtoeol.a 
+makelib ../lcurses +cr.put.a 
+makelib ../lcurses +curses.a 
+makelib ../lcurses +delch.a 
+makelib ../lcurses +deleteln.a 
+makelib ../lcurses +delwin.a 
+makelib ../lcurses +erase.a 
+makelib ../lcurses +fullname.a 
+makelib ../lcurses +getch.a 
+makelib ../lcurses +getstr.a 
+makelib ../lcurses +id.subwins.a 
+makelib ../lcurses +idlok.a 
+makelib ../lcurses +initscr.a 
+makelib ../lcurses +insch.a 
+makelib ../lcurses +insertln.a 
+makelib ../lcurses +longname.a 
+makelib ../lcurses +move.a 
+makelib ../lcurses +mvwin.a 
+makelib ../lcurses +newwin.a 
+makelib ../lcurses +overlay.a 
+makelib ../lcurses +overwrite.a 
+makelib ../lcurses +printw.a 
+makelib ../lcurses +putchar.a 
+makelib ../lcurses +refresh.a 
+makelib ../lcurses +scanw.a 
+makelib ../lcurses +scroll.a 
+makelib ../lcurses +setterm.a 
+makelib ../lcurses +standout.a 
+makelib ../lcurses +toucholap.a 
+makelib ../lcurses +touchwin.a 
+makelib ../lcurses +trace.a 
+makelib ../lcurses +tstp.a 
+makelib ../lcurses +tty.a 
+makelib ../lcurses +unctrl.a 
+cd ..
+

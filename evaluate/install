@@ -1,0 +1,10 @@
+* EXEC file to install evaluate program
+
+* The program and help file must be in the current directory!
+copy evaluate 17:evaluate
+copy evaluate.help 17:help:evaluate
+
+* Add line to syscmnd file
+echo "EVALUATE        *U	Set variable to an expression" >> 15/SysCmnd
+
+echo evaluate installed as a utility and added to 15/SysCmnd file

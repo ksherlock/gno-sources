@@ -1,0 +1,3 @@
+connect teal .ttya
+sz -v -v -b connect.c <.ttya >.ttya
+connect tealbye .ttya

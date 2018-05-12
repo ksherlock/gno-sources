@@ -1,0 +1,31 @@
+This somewhat simplistic version of the GSI NDA is simply a first
+quick hack at the program.  In the future I intend to program direct
+screen writing code into the NDA to allow ultra-quick scrolling and
+redraws, as well as simplify implementation of a terminal emulation:
+GNOcon at first, but vt100 eventually.. in other words, GSI NDA will
+be 'Xterm' in a nutshell.
+
+You _must_ have at least the GNO 1.0 versions of gsh and the kernel
+to use GSI NDA.
+
+Make sure prefix 31 is set in your gshrc file.  Prefix 31 must contain
+a directory that contains a directory called "/bin/".
+
+Example:
+in gshrc:
+  prefix 31 /hard1
+
+Must be the files:
+/hard1/bin	                bin directory
+/hard1/bin/gsh1.0	        copy of v1.0 of the gno shell
+
+Unfortunately, none of the components of GNO 1.0 are smart enough to locate
+gsh in all cases, so we require that you make a copy of gsh as "gsh1.0",
+and place it in that bin directory.
+
+If all else fails, if you have ORCA/C, you can edit 'pipe.c' to change
+the place GSI NDA looks for gsh.
+
+GNO V1.1 will address this problem in a comprehensive manner.
+
+Good luck, and enjoy!

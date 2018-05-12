@@ -1,0 +1,11 @@
+o/driver
+o/lexer
+o/parser
+o/emitter
+o/printer
+o/garbage
+o/prim
+o/misc
+o/stack
+o/evaler
+keep=gscheme

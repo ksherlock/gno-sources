@@ -1,0 +1,31 @@
+Installation
+
+Installing of GNO/ME is much simpler than in previous versions, because we have created an automated installation system. 'install' is a script-driven installation program, which is capable of copying files, unpacking files from ShrinkIt archives, and of creating the configuration text files (such as gshrc and initrc) necessary to get GNO up and running.
+
+If you are upgrading from GNO 1.0 to GNO 2.0, we recommend that you install GNO 2.0 'fresh' on your hard drive, and then move the parts of your old system that aren't a part of the standard GNO 2.0 distribution over to the new installation; then you can delete the old copy of GNO.  This is because GNO 2.0 provides new versions of almost all the utilities and other software provided with GNO 1.0.
+
+You'll need a hard drive partition with at least 5 MB (megabytes) free to install GNO.  GNO 2.0 comes on three floppy disks, and almost all the data on those disks is compressed.
+
+If you want to use your ORCA languages and tools, you should answer the appropriate questions during the install process. ORCA installation is covered in more detail below.
+
+1. Copy the contents of /GNO.Disk1 to the partition where you want to install GNO. The easiest way to do this is to run the IIGS Finderª program, insert the /GNO.Disk1 disk, and drag the /GNO.Disk1 onto the icon of the drive you want to install on. The Finder will tell you that the disks are of a different size, and ask you if you wish to place the contents of /GNO.Disk1 in a folder on the hard drive partition. Answer "Yes", and the Finder will copy the data.
+
+2. Open the newly created GNO.Disk1 folder on the partition and execute 'Kern' by double-clicking on the Kern icon.
+
+3. GNO.Disk1 contains a minimal GNO system which you have just started up. You'll see some copyright messages, and after a few seconds a prompt will appear.  This is the GNO Shell (gsh).  At the shell prompt, type the following command:
+
+% install verbose
+
+You have just executed the installation program, 'install'.
+
+4. Install will ask you some questions about how you want to install GNO.  Questions asked by install are boldfaced in the following discussion.
+
+Do you have existing Byteworks (ORCA) language products?
+If you use Byteworks language products such as ORCA/C, ORCA/M, ORCA/Pascal, etc. and wish to use them under GNO then answer 'Y' to this question. Otherwise, answer 'N'.
+
+Please type the name of the directory the file ORCA.SYS16 is in:
+If you answered 'y' to the first question, then you need to tell the installer where the ORCA software is installed. Usually, it will be in a directory called "ORCA" on one of your hard drive partitions. On our system, it is :software:orca.
+
+If you have forgotten where ORCA is on your hard drive and need to go find it,  you can press ^C (control-C) at this prompt, which will terminate install and return you to the shell. Then type 'exit' to quit GNO, and locate ORCA.
+
+If you cannot 

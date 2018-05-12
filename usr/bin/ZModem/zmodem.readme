@@ -1,0 +1,65 @@
+This file is a tutorial on how to use the Send Zmodem (sz) program with GNO.
+The file 'sz.1' includes comprehensive documentation, detailing all of the
+various options of sz.
+
+Also included are sb and sx programs, for Send Ymodem and Send Xmodem.
+They work very similarly to the procedure listed below for Zmodem
+(in fact, they're the same program).
+---------------------------------------------------------------------------
+
+To use zmodem under gno, you need to invoke the sz program with redirection
+to the modem port.  For example,
+
+1) Make sure the Control Panel Modem Port baud rate is set to the speed you
+   intend to connect at.
+
+2) Using TelCom (provided on the disk), log on to the BBS or computer you
+   want to upload files to.  If the computer you dialed is a Unix computer
+   or Proterm 3.0 with auto-Zmodem start, go to step 4.
+
+3) start the Zmodem receive function on the BBS
+
+4) Then, hit OA-Q.  You should be back at the GNO/Shell prompt.  Start the
+   zmodem send program by typing the following
+
+     sz filename <.ttya >.ttya
+
+   .ttya is a special device that implements high-speed serial communications.
+
+   the < and > operators tell sz to get input from and send output to
+   the device .ttya (the modem port) (you can change the names of the
+   serial devices by editing the dev/ttys file and rerunning GNO).
+
+   To send more than one file at a time, do the following
+
+     sz file1 file2 file3 ... fileN <.ttya >.ttya
+
+   To send the files in the background, execute sz with the '&'
+   command.
+
+     sz filename <.ttya >.ttya &
+
+   When the background file transfer is done, GNO will inform you
+   with a message similar to
+
+   [1] (done) sz filename
+
+   If you want status information on the progress of the transfer, use
+   the -v flag when running sz.
+
+     sz -v -v filename <.ttya >.ttya
+
+   (The -v option is not recommended for background transfers, as it
+   will clutter up the screen of whatever application you switch to).
+   Two -v's will give you a running display of the number of bytes
+   transferred.  More than two -v's enable sz debugging features, and
+   will probably give you more information than you care to see
+   (but can be helpful if you're having trouble getting the two
+   computers to 'talk').
+
+Note: I didn't provide the 'rz' (receive zmodem) command because it's
+still kind of flaky.
+
+This program can be used equally well from the text shell or gsiNDA
+(with the gsiNDA, any desktop term program automatically gets ZModem
+capabilities!  This is one of the benefits of real multitasking).

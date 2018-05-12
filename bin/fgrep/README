@@ -1,0 +1,164 @@
+Quick fgrep utility v1.1. Copyright October 5, 1992 by Christopher Neufeld
+
+   I wrote this utility in hopes of speeding up searches for
+case-independent fixed strings in files. The grep which comes with
+GNO/ME v1.0 is pretty slow.
+
+
+   How it works:
+
+   I was inspired by Gregg D. Brekke's LFCR program which converts
+between $D and $A line terminators. I was impressed at the speed, so I
+looked at the sources and noticed that he was reading with fread()
+instead of, say, fgets(). This sped things up a lot, and I started
+thinking about other projects I could write which would take advantage
+of that. This fgrep is the first such project.
+
+   So, after doing the usual housekeeping junk the program reads the
+file being scanned in 16kB chunks into a buffer space. It then calls a
+machine language routine which searches the buffer character by
+character against two search patterns. If a character fails to match
+the corresponding character in either of the two search patterns then
+comparison fails and the routine continues from the next position in the
+buffer. Why two search patterns? That's so that one can hold the upper
+case and one the lower case of the search string, and the routine can
+find the result in a case-insensitive manner. If the user has not asked
+for case insensitive searches with the '-i' switch then both patterns
+contain the same string, resulting in a marginal reduction in efficiency
+(~4 cycles per byte) as it does a redundant comparison.
+   The fragment returns the matching line in a character string, the
+line number of the match, and a return status which, if positive,
+indicates the offset in the buffer of the beginning of the line
+containing the match, and if negative indicates that a fatal error has
+occured (can happen if a line exceeds 16kB in length) or that the
+fragment is ready for the next 16kB chunk of file.
+
+   The assembly fragment is self-modifying, NOP-ing out a branch
+statement if the '-x' flag is invoked, and putting the buffer address
+into a LDA >long,X operand and the first character of each search
+pattern directly into CMP #num operands in a tight search loop. So the
+fragment screams through the buffer at a rate of one byte every 26
+cycles until it scores a hit on the first character. Then it switches to
+a separate subroutine which scans the strings to check the rest of the
+match.
+   The inner loop could be shortened by 4 cycles by removing the checks
+for LF ($A) line terminators, leaving only the CRET ($D) terminators. I
+opted not to do this, though.
+   Once the match is found the assembly fragment copies that line into a
+string so that the C "wrapper" won't have to do that.
+
+   There's also a '-f' mode available. The C "wrapper" program first
+counts the lines in the file, then mallocs enough space for all the
+strings it's going to need, rewinds the file, and loads the strings.
+Lines which exceed 99 characters in length are truncated to that length.
+At every string it checks to see if it is identical to another,
+previously loaded string, and if it is, it does not keep the string. If
+at the end of all this there is only one string to use as the search
+pattern then the high speed assembly fragment is used.
+   If there are two or more search strings a second, slightly longer
+assembly fragment is used which is very similar to the fast one. The
+difference is that this one has to check each line in the buffer against
+all the strings before going on to the next line.
+
+
+   Valid switches:
+
+   This program supports all the fgrep switches in the manual except '-b'.
+It does not support '-w', but that's a 'grep' switch, not 'fgrep'.
+
+   This fgrep can't be used in a pipe except in the first position.
+That's because 'fread()' doesn't like to work on the stdin stream. Since
+the assembly fragment works best when given big, 16kB chunks to play
+with, I decided that there'd be little point to reworking the program to
+handle stdin. If you need to use grep within a pipe, use the old, slower
+version.
+   NOTE: This is no longer true. v1.1 fully supports GNO/ME pipes. It
+doesn't work with ORCA shell pipes.
+
+
+
+   Speed?
+
+   So, what did I gain? Well, here's a part of a directory listing from
+my hard disk:
+
+-rw-brd 0000 txt     77430 Dec 17 00:41 1991 lines.20 
+-rw-brd 0000 txt    108544 Feb  2 02:14 1992 lines.21 
+-rw-brd 0000 txt     92160 Feb 18 22:19 1992 lines.22 
+-rw-brd 0000 txt    120832 Mar 20 20:52 1992 lines.23 
+-rw-brd 0000 txt     72950 Apr  3 17:31 1992 lines.24 
+-rw-brd 0000 txt     82431 May 14 01:00 1992 lines.25 
+-rw-brd 0000 txt     88656 Jun  6 16:41 1992 lines.26 
+-rw-brd 0000 txt     78443 Jun 13 20:45 1992 lines.27 
+-rw-brd 0000 txt     98251 Jun 21 02:30 1992 lines.28 
+-rw-brd 0000 txt     84075 Jul 10 23:16 1992 lines.29 
+
+   These are files containing UseNet clippings, collecting funny stuff
+from over the years. There are ten files for a total of 883kB. I then
+asked the old 'grep' program to search from GNO/ME 1.0:
+
+time grep -i flower lines.2*
+
+It took 133 seconds and made 8 hits.
+
+
+   Next, I did the same thing with the new Quick fgrep:
+
+time fgrep -i flower lines.2*
+
+Time taken: 16 seconds.
+
+
+Notes: This happened on a machine with a ZipGS 8MHz/16kB. It's a 20ms
+hard drive and an Apple DMA SCSI card. No other processes were running.
+
+
+
+   Details:
+
+   This program is freely available to anybody who wants it, including
+the sources. The sources are not derived from any other code, I wrote
+this entirely from the FGREP(1V) manual page and observing the behaviour
+of 'fgrep' on a UNIX box in a few test configurations. I know what
+you're going to say about the sources, and I usually document my code
+more extensively than this, but when you're inspired to program you
+don't want to take time to switch your brain back into English mode.
+
+   The following programs should appear in this package:
+
+README:        This file
+Qfgrep.asm:    The assembly fragment which does the work
+Qfgrep.Macros: A few ORCA/M macros used by Qfgrep.asm.
+Qfwrap.cc:     A C program to parse the command line and do disk I/O.
+fgrep:         The executable. A quick fgrep program.
+Makefile:      Command file for the 'make' utility.
+
+
+-------------------------------------------------------------
+
+Update Record:
+
+Oct 14, 1992 v1.1: With help from Jawaid Bazyar the program now accepts
+input from GNO/ME pipes. The change also increases the speed - the
+example listed above now executes in 11 seconds. The program still does
+not work with ORCA shell 2.0 pipes.
+
+-------------------------------------------------------------
+
+
+   If you want to send me fan mail (or bug reports) I can be reached at:
+
+neufeld@helios.physics.utoronto.ca   (preferred address)
+
+         - OR -
+
+utzoo.utoronto.ca!generic!cneufeld
+
+
+Snail Mail:
+
+      Christopher Neufeld
+      101 Subway Crescent #402
+      Etobicoke, Ont.
+      M9B 6K4
+      Canada

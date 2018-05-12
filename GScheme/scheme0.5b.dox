@@ -1,0 +1,1200 @@
+               GScheme
+               Version 0.5b
+
+               User/Programmers Manual
+               Last Revised 7/15/92
+
+Foreword:  This document consists of a product description and
+           a description of the GScheme modern Lisp implementation.
+           It is not complete, as the GScheme package is itself not
+           complete. Please contact the author if you need information
+           that does not seem to be contained within this document.
+
+7/15/1992 - Version 0.5b Notes:
+   Ack!  It's been fully three years since I last released GScheme.  This
+   is the first work I've done on it since then.  Basically, I ported the
+   system to ORCA/C to take advantage of ANSI prototyping; doing so 
+   revealed a bug where I was passing an incorrect number of parameters.
+   Since ORCA/C seems incapable of compiling any other available Scheme
+   interpreter, I'm going to start work once more on GScheme.  The first
+   thing I'm going to do is go through and make some performance enhancements
+   (I've learned a _lot_ in three years :-) and add some previously unavailable
+   features.
+   Since then I've also obtained the R3.99RS standards specification for
+   Scheme, and GScheme will be recoded to adhere to that standard.
+
+6/20/1989 - Version 0.4b Notes:
+   A bug incurred with the addition of tail recursion (0.3b) involving the
+   LET syntactic sugar statement has been fixed.
+   True Run-Time Garbage Collection has been implemented, complementing and
+   finishing up the addition of Tail Recursion. Processes may now run forever.
+
+   All occurrences of '0' as logical true have been replaced by a special
+   symbol #t, or more simply t.  '0' may still be used as a logical true,
+   but so may any other Scheme data structure besides ().  #t and t are
+   provided as a matter of compatibility with other Schemes.
+
+   Lambda has been modified to support the 'all args into a list' optional
+   form.  See Chapter 2 for details.
+
+Version 0.3b Notes:  (unreleased)
+   Tail recursion has been implemented.
+
+Version 0.2b Notes:
+   All the functions previously implemented as the library CADR.L have
+   been re-coded directly in C as primitives for speed and ease of use.
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+GScheme - An implementation of Scheme for the Apple //GS microcomputer.
+
+   US Snail                         Unix Mail
+-------------------------      ---------------------------
+Jawaid Bazyar                   bazyar@cs.uiuc.edu
+c/o Procyon Inc.
+P.O. Box 620334
+Littleton, CO 80162-0334
+
+For information on the latest version, contact me at one of the above
+addresses.
+
+Ported to Orca/C May 1992 (jb)
+
+Written by Jawaid Bazyar. Code and this User/Programmers manual
+   Copyright 1992 Procyon, Inc.
+
+portions by Simon Kaplan, PhD
+         and Carl McConnel
+         of the University of Illinois
+////////////////////////////////////////////////////////
+
+
+
+              Table of Contents
+
+   Chapter                          Page
+
+   i - Introduction
+   1 - Primitives
+   2 - Special Forms
+         DEFINE
+         IF
+         COND
+         QUOTE
+         LAMBDA
+         SET
+         LET
+         SEQUENCE
+         MAKE-ENVIRONMENT
+         ;  (comments)
+   3 - Libraries
+   4 - The GScheme Environment
+         INTERRUPT COMMANDS
+         THE DEBUGGER
+   5 - Implementation Notes
+         FUN WITH GARBAGE
+         FLOATING POINT CONSTANTS
+         MORE FLOATING POINT
+         THINGS TO COME
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+Chapter i:                   Introduction
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+    The GSCHEME package is an implementation of the SCHEME dialect of Lisp,
+described in Abelson and Sussman's classic "The Structure and Interpretation
+of Computer Programs" (MIT Press, 1982).  At this time the package is not
+complete, although it is VERY usable and useful.  It is recommended that
+"...Computer Programs" be obtained as it is a wonderful exposition of the
+power this relatively simple programming system has.
+    GScheme requires a command shell such as GNO/ME, or (ack) ORCA.
+    The system contains (as of July 15, 1992) the following files:
+
+core files
+       GSCHEME             EXE   (the interpreter)
+       SCHEME.LOGIN        TXT   (this LOADable file is executed whenever
+                                  GScheme is started up.)
+example files
+       SCHEME.L            SRC   (a VERY simple Scheme interpreter -
+                                  written in scheme)
+       DERIV.L             SRC   (some code that does symbolic differentiation)
+       NEWTON.L            SRC   (some code that does numeric differentiation)
+       QUEUE.L             SRC   (code that implements a QUEUE)
+       COMPLEX.L           SRC   (some interesting complex-number manipulation
+                                  stuff)
+
+   With the advent of System Software 6.0 and powerful multitasking shells
+such as GNO/ME, running GScheme will require between 1 1/8 and 2MB of memory
+to operate.
+   This is the first revision of the manual, so if something isn't quite
+coherent please forgive me.  Just send me a note telling me what is unclear
+or not present and I'll fix it immediately.
+
+==============================================================================
+
+About GSCHEME - what is supported
+
+   Here's a quick list:
+   --------------------------------------------------------
+   numbers   (implemented with APW C's DOUBLE FLOAT type)
+   symbols
+   procedures
+   strings
+   lists     (via QUOTE and LIST)
+   QUOTEing shortcut and QUOTEing recursion (the ' apostrophe special form)
+   vectors
+   garbage collection (both static and dynamic)
+   comments
+   -------------------------------------------------------
+
+   The garbage collection feature only checks for OUT-OF-MEMORY
+conditions at the end of a READ_EVAL_PRINT cycle.  If an OUT-OF-MEMORY
+occurs during an EVAL, bad things will happen (the interpreter will most
+likely forget what it was doing and either die or return peacefully to the
+prompt).
+
+   GSCHEME accepts input in either upper or lower case.  It converts all
+input to lowercase, except in the case of quoted strings, which are left
+upper-and-lower as the user entered.
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+CHAPTER ONE:            Primitive Definitions
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+       Here they are.
+===============================================================================
+"+"
+addition
+
+(+ {arglist})
+
+The {arglist} must be composed entirely of numbers or an error is generated.
+The result is the arithmetic sum of the numbers in the arglist.
+
+=> (+ 1 2 3)
+6
+=> (+ 1 -2 3)
+2
+
+(see "-","*","/")
+===============================================================================
+"-"
+subtraction
+
+(- num_a num_b)
+
+The result is the arithmetic difference between num_a and num_b.
+
+=> (- 4 3)
+1
+=> (- 3 -3)
+6
+
+(see "+","*","/")
+===============================================================================
+"*"
+multiplication
+
+(* {arglist})
+
+The {arglist} must be composed entirely of numbers or an error is generated.
+The result is the product of all the numbers in the arglist.
+
+=> (* 1 2 3)
+6
+=> (* 2 -3)
+-6
+=> (* 3 (+ 1 2))
+9
+(see "+","-","/")
+===============================================================================
+"/"
+division
+
+(/ dividend divisor)
+
+The result is the quotient of the dividend and the divisor
+(q = dividend / divisor)
+
+=> (/ 4 3)
+1.3333333333
+=> (/ 8 4)
+2
+
+(see "+","-","*")
+===============================================================================
+"="
+numeric equality
+
+(= num_a num_b)
+
+Returns a TRUE if num_a is equal to num_b, a NIL () otherwise.
+
+=> (= 3 3)
+#t
+=> (= 3 2)
+()
+
+(see ">","<")
+===============================================================================
+">"  greater than comparison
+"<"  less than comparison
+
+(> num_a num_b)
+or
+(< num_a num_b)
+
+These are similar to "=".
+
+=> (> 1 2)
+()
+=> (> 1 1)
+()
+=> (> 5 3)
+#t
+=> (> 1 2)
+#t
+(see "=")
+==============================================================================
+"1+"
+one-plus
+
+(1+ number)
+
+Returns (+ number 1).
+See +
+===============================================================================
+"abs"
+absolute value
+
+(abs number)
+
+The result is the absolute value of the number.
+
+=> (abs 10)
+10
+=> (abs -10)
+10
+===============================================================================
+"and"
+logical and
+
+(and cond1 cond2)
+
+If cond1 and cond2 are both true (i.e. neither are NIL), the result will
+be TRUE, otherwise the result will be NIL.
+
+=> (and 1 1)
+#t
+=> (and 0 0)
+#t
+=> (and 1 '())
+()
+
+(see "or", "not")
+===============================================================================
+"append"
+list concatenation
+
+(append list1 list2)
+
+Appends list2 onto the end of list1.
+
+=> (append '(1 2 3) '(4 5 6))
+(1 2 3 4 5 6)
+===============================================================================
+"assq"
+sequential list search with key
+
+(assq key table)
+
+ The TABLE is a list of records (pairs or lists).  assq searches the TABLE
+ until the CAR of one of its elements is EQ? to KEY.
+
+===============================================================================
+"assoc"
+sequential list search with key
+
+(assoc key table)
+
+ Same as assq, except it uses the EQUAL? procedure to test keys.
+===============================================================================
+"atan"
+trigonometric arctangent
+
+(atan number)
+
+Returns the radian value of the arctangent of NUMBER (i.e. returns the angle
+whose TAN is number).
+
+see SIN,COS,TAN
+==============================================================================
+"atom?"
+atomic value check
+
+(atom? x)
+
+Returns true if x is not a pair.
+===============================================================================
+"car"      (car pair)
+"cdr"      (cdr pair)
+"cons"     (cons dat1 dat2)
+
+These are the primitive selectors and constructor for the PAIR data type.
+A pair is exactly two elements.  Linked lists can be formed by making the CDR
+of a pair point to another pair, and having the CAR point to a data object.
+
+=> (define a (cons 1 2))
+a
+=> a
+(1 . 2)
+=> (car a)
+1
+=> (cdr a)
+2
+==============================================================================
+(cadr x)
+(caar x)
+(cdar x)
+(cddr x)
+(caddr x)
+(cadddr x)
+(cdadr x)
+
+These procedures are all shortcuts for car and cdr. They are read as follows:
+
+cadr - (car (cdr x))
+cdar - (cdr (car x))
+caddr - (car (cdr (cdr x)))
+etc...
+
+Fairly simple, eh?  Pronouncing them is another matter altogether.
+==============================================================================
+"cos"
+trigonometric cosine function
+
+(cos angle)
+
+Returns the cosine of ANGLE (which is in radians).
+see SIN, TAN, ATAN
+==============================================================================
+"display"
+display values
+
+(display <exprn>)
+
+Same as PRINC.
+
+see PRINC.
+==============================================================================
+"edit"
+invoke APW/ORCA editor
+
+(edit filename-string)
+
+Edit takes a single parameter; the filename of the file to load into the
+editor.  The editor that is invoked is the standard ORCA/APW/GNOME editor
+in prefix 4/; it is invoked with the shell "edit" command.
+
+=> (edit "test.scm")
+
+==============================================================================
+"error"
+user invoked error messages
+
+(error item1 item2 ...)
+
+The word "error: " is displayed, followed by a printout of all the items in
+the arglist.  Control is then passed to the regular error handler (the
+primitive debugger)
+==============================================================================
+"eq?"
+symbol equality
+
+(eq? x1 x2)
+
+EQ? returns TRUE if symbols x1 and x2 are equivalent.  EQ? also works on
+numbers, but not lists.  For lists, see EQUAL?.
+
+=> (eq? 1 2)
+()
+=> (eq? 'hi (car '(hi . there)))
+#t
+
+See EQUAL?
+==============================================================================
+"equal?"
+number, symbol, and list equality
+
+(equal? x1 x2)
+
+EQUAL? does a superset of EQ?.  If two lists are equivalent, EQUAL? returns
+TRUE, otherwise it returns NIL ().
+
+=> (equal? '(a b c) (append '(a) '(b c)))
+#t
+=> (equal? '(a b c) '(d e f))
+()
+
+See EQ?, "="
+==============================================================================
+"eval"
+evaluate expression
+
+(eval expr-list environ)
+
+The EVAL function evaluates the list structure EXPR-LIST as if it were code.
+The evaluation takes place inside the environment variable referenced by
+ENVIRON.  The read-eval-print loop that drives scheme uses the environment
+referenced by the binding "user-initial-environment".  User environments
+can be created with the MAKE-ENVIRONMENT special form, and can be used to
+make hidden data abstractions.
+
+=> (eval '(+ 1 2) user-initial-environment)
+3
+
+See MAKE-ENVIRONMENT (special form)
+==============================================================================
+"exit"
+exit GScheme
+
+(exit)
+
+There are no parameters.  GScheme exits and returns to the calling
+application. 
+==============================================================================
+"fre"
+free memory and garbage collection
+
+(fre flag)
+
+flag: 1 = Force garbage collection and return free memory
+      0 = only return free memory
+
+The FRE routine returns the number of bytes of free memory, and (depending on
+the setting of FLAG) forces a garbage collection which will free up memory
+currently used but not needed.
+
+=> (fre 0)
+62003              (free memory)
+=> (fre 1)
+63023              (free memory after garbage collection)
+==============================================================================
+"jawaid"
+silliness in action
+
+(jawaid)
+
+This routine prints the text "Jawaid is one hell of a guy."
+
+(note: this routine was installed by a friend as a joke, and I'm too lazy
+ to remove it)
+==============================================================================
+"length"
+list length
+
+(length list)
+
+This function returns the length of a list. See examples.
+
+=> (length '(a b c d))
+4
+=> (length '((a b) (b c) (c d) (d e))
+4
+
+See LIST,
+==============================================================================
+"list"
+list creation
+
+(list <list of values>)
+
+This function creates a list from the list of values.
+
+=> (list 1 2 3 4)
+(1 2 3 4)
+=> (list 'abc 2 '(def) 5)
+(abc 2 (def) 5)
+
+See LENGTH,
+==============================================================================
+"load"
+re-direct input
+
+(load filename-string)
+
+The LOAD command causes the interpreter to process the characters in a file
+as if they had been typed from the keyboard, allowing you to "load" in
+a file.  The "filename" is the full or partial pathname of the file. It
+MUST be enclosed in quotes (i.e. be a string).
+When the end of the file is reached, input is automatically restored to the
+keyboard.
+
+=> (load "cadr.l")
+#t
+=> cadr           ( the interpreter types all this)
+=> caddr
+=> cdadr
+=> etc...
+
+see EDIT
+==============================================================================
+"make-vector"
+vector type creation
+
+(make-vector size)
+
+MAKE-VECTOR returns a vector data object with SIZE elements.  Vectors are
+equivalent to arrays in some other languages.
+
+=> (define a (make-vector 3))
+a
+=> a
+#(undefined undefined undefined)
+
+see VECTOR-REF,VECTOR-SET!
+==============================================================================
+"max"
+maximum of arguments
+
+(max num1 num2)
+
+MAX returns the larger of the two arguments.
+
+=> (max 5 6)
+6
+=> (max 6 5)
+6
+
+see MIN
+==============================================================================
+"memq"
+sequential list search
+
+(memq item x)
+
+Searches the elements in list X for ITEM. If it is found, memq returns the
+sublist starting with ITEM. Otherwise, it returns ().
+==============================================================================
+"min"
+minimum of arguments
+
+(min num1 num2)
+
+MIN returns the smaller of the two arguments.
+See MAX.
+==============================================================================
+"newline"
+new line on display
+
+(newline)
+
+This procedure causes a C newline sequence to be sent to the standard
+output device.
+
+=> (sequence
+    (display "hi there this is a test")
+    (newline))
+hi there this is a test
+#t
+=> (display "hi there this is a test")
+hi there this is a test#t
+
+see DISPLAY, PRINC, PRINT
+==============================================================================
+"not"
+logical not
+
+(not <exprn>)
+
+Returns a true (0) if <exprn> is NIL, and returns NIL if the <exprn> is
+not NIL.
+
+=> (not '())
+#t
+=> (not #t)
+()
+=> (not 'not-nil)       -> Anything but NIL is considered true.
+()
+
+see AND, OR
+==============================================================================
+"null?"
+checks for null value
+
+(null? <exprn>)
+
+If <exprn> is NIL, returns 0.  In any other case this returns NIL.
+
+=> (null? '())
+#t
+=> (null? '(not a null list))
+()
+
+see NOT
+==============================================================================
+"number?"
+checks for numeric value
+
+(number? <exprn>)
+
+If <exprn> is a number (like 1,2.023, etc.) NUMBER? returns TRUE (0).
+Otherwise it returns NIL.
+
+=> (number? 1.023)
+#t
+=> (number? 'abc)
+()
+==============================================================================
+"or"
+logical or
+
+(or cond1 cond2)
+
+If either cond1 or cond2 is true (i.e. neither are NIL), the result will
+be TRUE (0), otherwise the result will be NIL.
+
+=> (or 1 1)
+#t
+=> (or 1 '())
+#t
+=> (or '() '())
+()
+
+(see "and", "not")
+==============================================================================
+"pair?"
+cons pair inquirer
+
+(pair? datum)
+
+Tests an expression to see if it's a pair. Logical negative of (atom? x).
+
+=> (pair? '(1 . 2))
+#t
+=> (pair? 123)
+()
+==============================================================================
+"princ"
+"print"
+display values
+
+(princ <exprn>)
+(print <exprn>)
+
+PRINC displays the value of <exprn> on the output device.  PRINT does the
+same, except it automatically appends a NEWLINE sequence.
+
+=> (princ 1.023)
+1.0230
+=> (print 1.023)
+1.023
+#t
+=> "hi there"
+"hi there"
+=> (print "hi there")
+hi there
+#t
+
+see also DISPLAY (same as PRINC)
+==============================================================================
+"read"
+input text as a list
+
+(read)
+
+Causes SCHEME to get keyboard input, parsing it as a list.  When used with
+LOAD, allows a program to read sequentially from a text file.
+
+=> (read)
+(hi there (a test))    <- you type this
+(hi there (a test))    <- interpreter returns this
+=> (car (read))
+(hi there)             <- you type this
+hi
+=> (define a (read))
+hi-there-this-is-a-test
+a
+=> a
+hi-there-this-is-a-test
+
+see also LOAD
+==============================================================================
+"runtime"
+system tick counter check
+
+(runtime)
+
+Returns a number indicating the number of Ticks that have occurred since
+GS/OS was started up.  One tick is 1/60 of a second.
+
+=> (runtime)
+2300
+=> (runtime)
+2430
+=> (runtime)         (after a pause of several minutes)
+3410
+==============================================================================
+"symbol?"
+symbol value check
+
+(symbol? <exprn>)
+
+If <exprn> is a symbol, SYMBOL? returns TRUE (0).  If not, it returns a
+NIL ().
+
+=> (symbol? 'hi)
+#t
+=> (symbol? '(a list))
+()
+=> (symbol? 123)
+()
+==============================================================================
+"set-car!"
+pair assignment
+
+(set-car! <pair> <exprn>)
+
+Assigns the CAR pointer of <pair> to point to the value of <exprn>.
+
+=> (define a (cons 1 2))
+a
+=> (car a)
+1
+=> (set-car! a 'ship)
+undefined
+=> (car a)
+ship
+==============================================================================
+"set-cdr!"
+pair assignment
+
+(set-cdr! <pair> <exprn>)
+
+Assigns the CDR pointer of <pair> to point to the value of <exprn>.
+See SET-CAR! for examples.
+==============================================================================
+"sin"
+trigonometric sine function
+
+(sin angle)
+
+Returns the sine of ANGLE (which is in radians).
+see COS, TAN, ATAN
+==============================================================================
+"sqrt"
+numeric square-root
+
+(sqrt number)
+
+Returns the square root of NUMBER.
+==============================================================================
+"square"
+numeric squaring
+
+(square number)
+
+Returns the value NUMBER * NUMBER, the square of NUMBER.
+
+=> (square 12)
+144
+=> (square -0.25)
+0.0625
+==============================================================================
+"tan"
+trigonometric tangent
+
+(tan angle)
+
+Returns the tangent (sin/cos) of angle ANGLE. ANGLE is specified in radians.
+see SIN, COS, ATAN.
+==============================================================================
+"vector-ref"
+vector access
+
+(vector-ref vector index)
+
+Returns the INDEXth element of vector VECTOR.
+
+=> (define a (make-vector 3))
+a
+=> (vector-set! a 3 'test)
+#(undefined undefined test)
+=> (vector-ref a 3)
+test
+
+see MAKE-VECTOR, VECTOR-SET!
+==============================================================================
+"vector-set!"
+vector manipulation
+
+(vector-set! <vector> <index> <exprn>)
+
+Sets the <INDEX>th element of <VECTOR> to the value of <EXPRN>.
+
+see VECTOR-REF and MAKE-VECTOR for examples.
+==============================================================================
+"vector-length"
+vector size
+
+(vector-length vector)
+
+Returns the initial size of VECTOR specified with MAKE-VECTOR.
+
+See MAKE-VECTOR, VECTOR-REF, VECTOR-SET!
+==============================================================================
+"vector?"
+vector value check
+
+(vector? <exprn>)
+
+Returns TRUE if <exprn> is a VECTOR value, otherwise it returns NIL.
+==============================================================================
+
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+CHAPTER TWO:                  Special Forms
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+Special forms are functions that can not be implemented as primitives. Most
+of the special forms deal with manipulation of environments.
+
+
+==============================================================================
+(define <var_name> <exprn>)
+(define (<proc_name> <arg_name_list>) <body>)    (syntactic sugar for lambda)
+
+(DEFINE creates a new variable binding in the current environment, and
+sets its value to the value of <exprn>.  (DEFINE returns a symbol which
+is the variable name.
+The second version of define is simply short for
+(define <proc_name> (lambda (arg_name_list) <body>)))
+
+=> (define a 10)
+a
+=> a
+10
+=> (define (proc a) (* a 3)))
+proc
+
+==============================================================================
+
+(if <predicate> <consequent> <alternative>)
+
+If the value of <predicate> is not NIL, <consequent> is evaluated.
+Otherwise, <alternative> is evaluated.  <alternative> is optional; if
+it is not present and <predicate> is NIL, a NIL is returned.
+
+==============================================================================
+
+(cond (<p1> <e1>)
+      (<p2> <e2>)
+       .
+       .
+      (<pn> <en>))
+
+(explanation excerpted from "Structure and Interpretation", page 17.)
+
+This is the general form of a conditional expression.  The arguments are pairs
+of expressions (<p> <e>) called clauses.  The first expression in each pair
+is a PREDICATE-that is, an expression whose value is interpreted as either
+true or false.
+Conditional expressions are evaluated as follows.  The predicate <p1> is
+evaluated first.  If its value is false, the <p2> is evaluated.  If its value
+is also false, then <p3> is evaluated.  This process continues until a
+predicate is found whose value is true (i.e. non-nil), in which case the
+interpreter returns the value of the corresponding CONSEQUENT EXPRESSION <e>
+of the clause as the value of the conditional expression.
+(end of excerpt)
+
+GSCHEME pre-defines a binding called ELSE whose value is non-NIL.  If
+this is used as the last predicate in a COND, ELSE provides a 'default' choice
+in the conditional.
+
+==============================================================================
+
+(quote <list_def>)
+'<list_def>      (single apostrophe)
+
+These special forms provide a means of shorthand entering lists as data
+objects directly into scheme (without the LIST primitive).  The <list_def> can
+be any data object (including numbers, lists, symbols, etc.).  The value of
+(QUOTE is the value of the <list_def>.  Placing a single-apostrophe in front
+of a <list_def> is simply shorthand for (QUOTE.  Note that QUOTEs may be
+nested to any level.
+
+Note: As of this time Vectors cannot be entered in this manner.
+
+==============================================================================
+
+(lambda (<formal-parameters>) <body>)
+or
+(lambda list-var <body>)
+
+Creates a function with arguments <formal parameters>.  <body> is executed
+whenever the (lambda is called, with the arguments bound to formal-parameters.
+Since that is thoroughly confusing some examples will suffice.
+If the optional form of the special form is used, all the arguments sent to
+the lambda will be combined in a list and bound to the argument name LIST-VAR
+in the evaluation environment.
+
+(lambda (a b c) (+ a b c))
+  creates a function in which A B and C are the parameters, and which returns
+their sum.
+  If the above lambda was given a name with define like this
+(define foo (lambda (a b c) (+ a b c)))
+  we could call it like so:
+(foo 1 2 3)
+  A would get bound to 1, B would get bound to 2, etc.  (foo 1 2 3) would
+return 6.  If, however, we used the following statement
+(define foo (lambda x ...)) the binding X would be the list '(1 2 3).
+
+  (see "Structure and Interpretation" for a more coherent description of
+   lambda and the special define form)
+
+==============================================================================
+
+(set! <variable> <value>)
+
+Changes the binding of <variable> to <value>.  Does not create new bindings
+and returns an error if <variable> is unbound.
+
+==============================================================================
+(excerpted from "Structure and Interpretation", page 60, without remorse :)
+
+(let ((<var1> <exp1>)
+      (<var2> <exp2>)
+       .
+       .
+      (<varn> <expn>)
+   <body>)
+
+let <var1> have the value <exp1> and
+    <var2> have the value <exp2> and
+....
+    <varn> have the value <expn>
+in <body>
+
+This is equivalent to (and in fact implemented as)
+((lambda (<var1> ... <varn>)
+   <body>) <exp1> ... <expn>)
+
+==============================================================================
+
+(sequence <exprn1> <exprn2>... <exprn-n>)
+
+Evaluates <exprn1>, <exprn2>, etc. in sequence.  The value of the (SEQUENCE
+form is the value of the last expression.
+
+==============================================================================
+(make-environment <exprn1> <exprn2> ... <exprn-n>)
+
+MAKE-ENVIRONMENT creates a new Scheme environment (exactly as if a lambda had
+been executed), and evaluates the expression list within the new environment.
+The parent environment is the environment the MAKE-ENV statement was
+executed in.  See the primitives EVAL and APPLY for more info. (APPLY not
+currently implemented).
+
+==============================================================================
+COMMENTS
+
+A comment may be added to the end of a line (the entire line if the comment
+starts in the first column) by placing a semicolon (;) followed by the
+comment.  For instance...
+
+(define (rogue armor strength) ;; this is a comment, SCHEME will ignore this
+
+The "this is a comment" garbage is ignored by Scheme.  The usual convention is
+to use double ;; semicolons, although only one is really required.
+
+==============================================================================
+NUMBERS
+
+A number in Scheme is simply a numeric constant, e.g. 123 or 45.22 or 0.23.
+Note that decimal fractions without a whole part (like 0.23, 0.44) MUST
+BE PRECEEDED with a "0.". Scheme will not accept ".45" as a valid numeric
+constant.
+Numbers in Scheme are self-evaluating: typing
+=> 123
+is the same as typing
+=> '123
+
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+CHAPTER THREE:                Library Files
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+The final format of the library files has not yet been determined. Right now
+they are implemented simply as LOADable text files containing procedure
+definitions.  Load a library with the following command from the prompt:
+
+(load "libname")
+
+Where libname is the partial or complete ProDOS pathname of the library to
+load.  GScheme does not yet (!) implement a standard library location.
+
+NOTE:
+  Since I re-implemented the procedures in cadr.l as primitives, there are no
+  system libraries (I don't even know if I'll have them yet).
+
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+CHAPTER FOUR:          The GScheme Environment
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+   GScheme has been placed in a rich programming environment including a
+fledgling integrated debugger (and soon an integrated editor).  There are
+some interesting things you can do to use this environment to its fullest.
+
+INTERRUPT COMMANDS
+==================
+
+   There are two keyboard commands that can be used during execution of a
+Scheme program.
+
+   ESC  - Pressing the ESCape key will immediately drop you into the debugger.
+          (described below).
+   OA-. - Pressing the OPEN-APPLE key along with the . (period) key will
+          force a Reset condition inside Scheme. Execution of any program will
+          immediately stop, and control will be returned to the top-level
+          prompt.  All internal stacks are cleared.
+
+
+THE DEBUGGER
+============
+
+   As was mentioned above, GScheme has a simple debugger.  It is invoked
+whenever an error is detected during the execution of a program, or if the
+user presses ESCape during execution.  In the case of an error, a short
+message describing the type of error is displayed, and after hitting a key
+control is handed to the debugger.
+   The debugger's commands are as follows:
+
+   P  -  This displays the Procedure stack. It is basically a trace
+         of all the routines that were executed to get to this point. For
+         instance, if FOO called BAR and BAR called FUB and FUB called + and
+         an error occurred in the + primitive, then when in the debugger the
+         procedure stack would look like this:
+
+             +
+             FUB
+             BAR
+             FOO
+             top-level-expression
+
+         Where top-level-expression represents the statement that you typed to
+         initiate the sequence.
+
+   E  -  Prints the contents of the Evaluation stack.  The Evaluation stack
+         is used by all the components of the GScheme system to talk to
+         each other, pass parameters, hold results of evaluations, and many
+         other things.  The contents of this at any given time are basically
+         indeterminate.
+
+   Q  -  Quits the debugger and returns control to whatever invoked the
+         debugger (in the case of an error condition, GSCheme will be Reset
+         and will return to the top-level prompt.)
+
+(The debugger will soon include features such as variable tracing, code
+ listing, and access from inside a program).
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+CHAPTER FIVE:          Implementation Notes
+
+()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()
+
+FUN WITH GARBAGE
+================
+
+Well, after a month or two of sporadic work on and hopeless debugging of the
+runtime garbage collector, I gave up.  Three days later I completed it. (Ahh,
+the life of a programmer...)  Anyway, I've tested it a lot and it should be up
+to snuff.  But if you have any strange problems with programs that use enough
+memory to call the collector during runtime, then you might want to drop me a
+note along with the program in question, so I can see for sure whether or not
+it's the GC.
+
+GScheme is initially set up with a 64K workspace. There is at this time
+no provision to change this without modifying the source code. Increasing
+the workspace size beyond 64K has not been done. If you'd like to experiment
+and have the source, go for it!  If you want the source, please notify me
+(various addresses listed at the beginning of this document).
+
+FLOATING POINT CONSTANTS
+========================
+
+When entering floating point constants, be sure to place a leading zero (0) if
+there is no whole part. For example, GScheme will choke on
+
+=> .001
+
+but will find
+
+=> 0.001
+
+more than pleasing.  Remember this when making mathematics-based programs.
+
+MORE FLOATING POINT
+===================
+
+Well, I figured out SANE (a little, anyway).  SIN, COS, TAN, ATAN, and SQRT
+are all at your command. They all work in radians (of course).
+
+I'm not sure what's causing small errors in the floating point routines (for
+instance, load the NEWTON.L example file and type
+((deriv square 0.001) 5)
+
+The answer should be 10.001 or something and what you get is 10.0001000048764.
+So, in other words, don't assume the math system is perfect (far from it).
+I may write my own BCD routines for the math (kinda slow, but accurate beyond
+belief!)
+
+Also, don't be alarmed when (sin 3.141592653) doesn't return zero.  GScheme
+stores its numbers in double precision, and calculates those values in SANE
+Extended.  You don't get enough digits of pi into the SANE engine for it to
+come out exactly.  Future versions of Scheme will store values using Extended
+(taking more space in memory but increasing precision).
+
+Version 0.4b note: The numeric system will be changed to accommodate the
+standard BigNum system used in CommonLisp and MIT Scheme. This will take
+some time as right now I have no idea how it's implemented.
+
+THINGS TO COME
+==============
+
+Well, I basically ramble about new features all throughout the text, so here
+I'll summarize what additions/changes I think I'll make in later versions.
+
+  New Primitives
+
+  round         Some nice primitives for easing math stuff. Round is very
+  ceiling       necessary for a lot of things.
+  floor
+  remainder
+  random
+  quotient
+
+  apply               "Useful for implementing embedded languages."
+
+  Compiler          - yes, it's true, you can compile Scheme.  This one is
+                      way off, since I basically have to re-write another
+                      Scheme lex/parse/eval system to spit out native
+                      65816 code. And link it to C, Pascal, and interpreted
+                      Scheme.
+
+
+ Bored yet? I know I am.  The best part about this list is that will shrink
+ as time goes bye. (sic)
+
+ jb

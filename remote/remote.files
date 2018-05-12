@@ -1,0 +1,31 @@
+There are many files that are used when remote password-protected
+login of your computer is enabled.
+
+/etc/utmp
+	Current list of users that are logged in.  There is an entry
+	for each terminal that is currently configured as a login
+	terminal in the /etc/gettytab file.
+
+/etc/wtmp
+	A history of the recent logins on your computer.  Each time
+	someone logs in, the /etc/utmp entry detailing the user that
+	is logged in is appended to /etc/wtmp.  Occasionally, you will
+	want to reset /etc/wtmp with the following command:
+		echo -n > /etc/wtmp
+	You can set up cron to do this automatically once in a while
+	by using the following crontab entry:
+		gsh -c echo -n > /etc/wtmp
+	Alternatively, to avoid the overhead of bringing up a shell,
+	you can use:
+		/bin/cat .null > /etc/wtmp
+
+/etc/ttyconf
+	This file is the standard configuration file for GNO's
+	loadable terminal drivers.  See the GNO Kernel Reference
+	for setup information.
+
+/etc/ttytab
+	ttytab is the login terminal configuration file.  You can control
+	which terminals accept logins, which accept root logins,
+	what communication speeds the TTYs are expecting (if appropriate),
+	and other factors.

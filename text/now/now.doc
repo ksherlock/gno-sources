@@ -1,0 +1,41 @@
+
+===========
+    NOW
+===========
+
+Version 1.2
+
+There are no parameters for now.  Note that now's output might be 
+considered offensive by some.  You've been warned.  People who don't
+read doc files first (or look at movie ratings or read reviews etc...)
+don't deserve to be protected from 'obscenity'.
+
+In any case, now uses VERY random numbers (the x and y positions of the 
+electron gun in the monitor) to generate some (usually) funny statements.
+Give it a try...
+
+Update notes:
+   v1.2 - 'now' now returns a 0 from main, so it doesn't stop Orca batch files.
+
+-----
+
+Jawaid Bazyar (ported from the Amiga)
+
+Copyright 1990 by Procyon Software
+Freeware - distribute but don't sell!
+
+This utility is FreeWare.  Distribute them as much as you like, just
+don't sell them or distribute modified versions.  Send me your comments -
+I'm eager to hear from you for suggestions and improvements.
+
+Also, if you make any modifications to the code please do not redistribute
+them. Instead, send me the changed source along with an explanation and
+I will consider including your change in the next version.
+
+	Jawaid Bazyar
+	1120 Maple Street
+	Mt. Vernon, IL 62864
+
+	Internet/ARPAnet     bazyar@cs.uiuc.edu
+	GEnie                J.BAZYAR
+

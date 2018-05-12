@@ -1,0 +1,194 @@
+Hi there, and welcome to our great new show, "Let's play with Run-Time
+Libraries!"
+
+Contrary to popular belief, programming with RTLs is not only easy,
+but productive!
+
+My major desire for RTLs is to try to reduce the code size of the
+utility programs shipped with GNO/ME.  We are now up to about 65 or
+70 utility programs.  Most of these all use C's strcpy, strlen, memcpy,
+etc. etc. ad naseum.  Having 70 copies of a bunch of library routines
+on a disk does not excite me.  Hence, RTLs _do_ excite me.
+
+Anyway, to make a long story short, you need the following software to
+make this work:
+
+LinkIIgs (1990 or later version)
+ORCA/C 1.3 and/or ORCA/M 2.0
+
+Now, it's possible that earlier versions of these programs will produce
+the desired results, or even that other products (like APW C) will
+do the trick, but I have neither the time nor the inclination to do
+the testing, as my time is inclined to run very fast these days.
+
+Included are two examples.  One is completely in ORCA/C, the other is
+completely in assembly (ORCA/M).
+
+To build the examples:
+
+GNO: 1) cd to the directory with the source
+     2) type make
+
+without GNO:
+     1) Go buy GNO
+     2) follow instructions above
+
+Note that there is a bug in GNO 1.0 that causes bad things to happen
+when the system is finished loading dynamic segments.  In particular,
+your screen will turn red and the message "System Failure: $1101"
+will appear.  I'm going to be tracking this down for GNO 1.1, for
+obvious reasons.  For now, do your RTL testing under ORCA.
+
+All kidding aside, if you have GNO, FYI the 'make' utility works under
+ORCA, too.  The best way to access make from ORCA is with an alias; I
+really hate the SYSCMND table.
+
+If you _don't_ have GNO's make utility, the following steps ought
+to do the trick:
+
+compile t.c keep=t
+compile l.c keep=l
+LinkIIgs -p -t rtl -o tstlib l.a
+LinkIIgs -t exe -o t -lib tstlib -lib 2/orcalib -lib 2/syslib t.root t.a
+compile t1.asm keep=t1
+compile l1.asm keep=l1
+LinkIIgs -p -t rtl -o tstlib1 l1.root
+LinkIIgs -t exe -o t1 -lib tstlib1 t1.root
+
+LinkIIgs will give you bogus "Invalid Segment Number" errors in both
+links (to create the library and to link the executable).  I don't know
+why, perhaps it's my somewhat dated version of LinkIIgs.  The resultant
+executables do work, however.  Also note the "-p" option to the first
+LinkIIgs in each group; leaving this off causes LinkIIgs to hang about
+90% of the time. It's probably related to the invalid segment number
+bogosity.  You will also get some warnings from LinkIIgs; ignore them,
+or bug Tim Swihart about fixing it. :)
+
+t will print the value of argv[1]
+t1 will print the value of the command line string passed to the
+  executable.
+
+Neither program is exactly exciting, huh?  Well, that's life.  These
+examples do show that RTLs work, however.
+
+--
+Concerns:
+
+RTLs are really useful only if the following is true:
+
+1) the system only loads the RTL code from disk once, even if referenced
+   by multiple executing programs
+2) the system does a (date required >= date of library) check, instead
+   of a (date required == date of library) check.
+
+I don't know the answers to either of these.  The person best qualified
+to answer them most likely works at Apple.  You know who you are.
+--
+Source Notes:
+
+Since the source is so small, I'm including it here so it's easier to
+discuss things.
+
+== l.c ==
+
+#include <texttool.h>
+
+/*
+ *	ORCA/C 1.3 has a bug where it adds garbage to the end of a segment
+ *	name that is not 10 characters long.  The _true_ "blank segment"
+ *	name is ten (10) spaces, not nulls.
+ *	The thing that hung me up for a bit was the ',dynamic' at the end
+ *	of the segment directive.  This is required or LinkIIgs won't
+ *	properly deal with the code when moving it into the RTL.
+ */
+
+segment "          ",dynamic;
+int testlibfunc(char *s)
+{
+    WriteCString(s);
+}
+
+== t.c ==
+
+/*
+ *	Code that accesses RTLs requires no changes over accessing
+ *	a regular library.
+ */
+
+int main(int argc, char *argv[])
+{
+    testlibfunc(argv[1]);
+}
+
+== l1.asm ==
+
+* Note the "kind $8000" directive; this tells the linker that this
+* segment is to be treated as a dynamic segment, similar to the
+* ',dynamic' clause in the C code above.
+
+		case	on
+testlibfunc	START
+		kind	$8000
+		phx
+		phy
+		ldx	#$200c
+		jsl	$E10000
+		rtl
+		END
+
+== t1.asm ==
+
+* Again, no changes to the calling program
+
+		case	on
+t		START
+		jsl	testlibfunc
+		rtl
+		END
+
+--
+Note that no existing dumpobj utilities can correctly disassemble
+(and in many cases even parse) an RTL library OMF file.  Like the
+segments are any different.  Sheesh.  Anyway, the GNO 'lseg' utility
+(available on Internet) does properly list the segment names and
+lengths, so you can get an idea of where everything is going.
+
+For these small examples, you end up spending more space with pathname
+and jump tables than you save.  However, in a large program which brings
+in many (reentrant) library routines, RTLs will save a bunch.  You _do_
+incur some CPU overhead in opening the RTL file and scanning it, but
+for this small example it wasn't noticeable.  I don't know how larger
+programs would be affected.  If the system is smart enough to know that
+a particular RTL segment is already in memory, or can be modified to
+act this way, then we have a big win.  For example, the GNO kernel will
+bring in a number of the most common library routines when it starts
+up, and utilities that are run will be patched by the loader to point
+to them.
+
+There is yet another benefit to RTLs: if the system properly deals
+with RTL version concerns, bugs in a library routine can be fixed in
+the RTL, and all programs that use that function can take advantage of
+the bug fix without modification, re-compiling, or re-linking.
+--
+I have in mind the RTL treatment for most of ORCA/C's library calls.
+I am already drooling over the savings in disk space used; the only
+question is whether or not the extra CPU taken is worth these savings.
+In addition, ORCA/C's libraries have some big tables (like for <ctype.h>)
+and would also reduce executable code sizes a bunch.
+--
+Oops, I forgot one point- RTLs (if indeed the loader does or can
+allow apps to share already-loaded code) also save memory.  This is a
+BIG bonus for multitasking on the IIgs.
+
+If you have any questions (or would like to profesionally question my
+sanity) you can reach me at:
+
+Internet:	bazyar@cs.uiuc.edu
+GEnie:		PROCYON.INC
+AOL:		GNO Jawaid
+Delphi:		JAWAIDB
+
+c/o Procyon Enterprises, Inc.
+P.O. Box 620334
+Littleton, CO 80162-0334
+(303) 933-4649

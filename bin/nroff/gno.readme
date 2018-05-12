@@ -1,0 +1,35 @@
+nroff - Text Processing Typesetter
+----------------------------------
+
+This is 'nroff 1.10' for GNO/ME 1.0.  This is fairly close to the real
+Unix nroff, although there are still some things that this one doesn't
+do that it should.
+
+This software was ported by Mike Horwath and Jawaid Bazyar for the GNO
+Multitasking Environment.
+
+10/12/92 jb
+
+Redid termcap handling so that using one of the new printer termcaps should
+result in _nice_ output.
+
+4/21/92 jb
+
+Fixed double-line problem when redirecting and piping the output of nroff.
+(It sticks \r's in the output text all over the place.  I simply filter
+ them out in prchar)
+
+
+Notes:
+  This software works with any GNO-compatible shell (Orca suffices, but
+  pipes don't work very well under Orca, and according to dozens of GNO users,
+  GNO is "simply superior".)  To order GNO/ME (the _ONLY_ multitasking system
+  for the Apple IIgs, call or write
+
+  Procyon, Inc.
+  1005 N. Kingshighway, Suite 309
+  Cape Girardeau, MO 63701
+  (314) 334-7078
+
+  Procyon ships both domestic and international (very reasonable rates).
+  GNO/ME is only $80 + s&h.

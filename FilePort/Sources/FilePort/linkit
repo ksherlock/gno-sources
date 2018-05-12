@@ -1,0 +1,10 @@
+#
+#  ---  Link(?) Script  ---
+#
+
+echo
+echo Linking the FilePort port driver
+set KeepType="\$BB"
+set AuxType=2
+compile +w linkfile KEEP=FilePort
+cp fileport /procyon/system/drivers

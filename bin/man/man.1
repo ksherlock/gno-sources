@@ -1,0 +1,31 @@
+.\" man(1) manpage by Jawaid Bazyar (6/28/92)
+.\"
+.TH MAN 1
+.SH NAME
+man - online manual system (Version 1.6)
+.SH SYNOPSIS
+man manpagename
+.SH DESCRIPTION
+man is the access point to the online manual system.  man works
+as a shell that calls an appropriate text formatter to format a
+manual page.  There are currently three text formatters available
+for the GNO/ME system.
+.IP nroff
+Unix standard typesetting package
+.IP aroff
+formats AppleWorks GS(tm) documents
+.IP cat/more
+used to display preformatted documents
+.sp
+.SH ENVIRONMENT
+man recognizes the following variables from the shell.
+.IP USRMAN
+This variable is
+.BR required .
+It points to the manual system root directory.
+.IP PAGER
+man uses
+.B more
+as the default pager.  If you wish to use a different pager,
+.B less
+perhaps, then you must set this variable to point to that pager.

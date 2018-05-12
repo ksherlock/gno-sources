@@ -1,0 +1,44 @@
+JIVE and VALSPEAK
+---- --- --------
+
+These are ports of the Unix text processing utilities 'jive' and
+'valspeak'.  These utilities take ordinary English text and convert
+them to either 'Jive Talk' or 'Valley Girl Speak'.
+
+To use them, either pipe or redirect input into them; they will process
+the text a line at a time, generally, and send the result to standard
+output.  You can also run them without redirection or piping, and
+type text into them via standard input, although they tend to act on
+CR's strangely when you do (but otherwise work fine).
+
+They are quite pointless, but rather fun.  I can imagine that a BBS
+might make use of them to print humorous adaptations of fortune
+entries (or even Dan Quayle quotes!  Pipe autoquayle into jive,
+for example, to get a good laugh).
+
+These utils are completely public domain, and require the GNO/ME
+system due to the needs of the flex scanner generator.
+
+Note that to recompile these utilities you'll need flex, which hasn't
+been released yet (12/22/92), pending the fix of some UNIX dependencies.
+
+Enjoy!
+
+Jawaid Bazyar
+Procyon Enterprises, Inc.
+P.O. Box 620334
+Littleton, CO 80162-0334
+
+These utilities show the power of GNO/ME by being among the numerous
+UNIX programs that compile with very very little or no modification
+on the IIgs with GNO/ME and ORCA/C.
+
+For more information on GNO/ME, the only UNIX system for the IIgs,
+contact Procyon at the address above or by one of these more modern
+techniques:
+
+Phone:		(303) 933-4649
+America Online:	GNO Jawaid, and Procyon's Company Support area in ADV
+GEnie:		PROCYON.INC, and Category 30 in A2PRO
+Delphi:		JawaidB
+Internet:	bazyar@cs.uiuc.edu

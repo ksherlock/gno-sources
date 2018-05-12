@@ -1,0 +1,12 @@
+o/MAIN
+o/EXTERN 
+o/FLUSH.IN 
+o/INIT.FIELD 
+o/MAKE.LEVEL
+o/MOVE 
+o/MOVE.ROBS 
+o/PLAY.LEVEL 
+o/QUERY 
+o/RND.POS 
+o/SCORE 
+/src/lib/curses/lcurses

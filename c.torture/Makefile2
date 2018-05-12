@@ -1,0 +1,12 @@
+OBJS = crm.o s243.o s26.o s626.o s715.o s7813.o s85.o s9.o \
+  s22.o s244.o s4.o s71.o s72.o s81.o s86.o setev.o  \
+  s241.o s25.o s61.o s714.o s757.o s84.o s88.o
+
+CC = gcc
+CFLAGS = -g -B./gcc- -ffloat-store
+
+doit: test
+	test
+
+test: ${OBJS}
+	gcc -o test *.o ../gcclib.o -g

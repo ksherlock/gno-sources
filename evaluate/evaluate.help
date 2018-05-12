@@ -1,0 +1,18 @@
+EVALUATE [-W] name expression
+
+The named variable is set to the expression.
+
+Parameters:
+   -W		Supress wildcard expansion of the expression (optional).
+   name         Name of the variable to set.
+   expression   Expression to set the variable to. Can contain
+		 - wildcard characters (e.g. =, 8/, .d2)
+                 - quoted strings enclosed in ' or "
+                 - command strings enclosed in `
+                 - an index range enclosed in [] and appearing last
+Examples:
+     evaluate cmds `help` [3-#]
+     evaluate cfiles =.cc
+     evaluate currentdir 8/
+
+Freeware by Dave Tribby
